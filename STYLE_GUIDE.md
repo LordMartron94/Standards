@@ -84,6 +84,14 @@ The only thing that is plausible to put in client projects aside from glue code 
 
 The first instinct must ALWAYS be to make systems re-usable. 
 
+Similar to this, code that is part of the same (sub-)system should virtually always be put in the same file such that understanding it does not require a dozen or so jumps, or different files. See also: [function length](#function-length).
+
+In my codebases, do not be afraid to find files of 1k+ or even 3k+ lines of code. I dislike fragmented codebases where every single piece of functionality is contained in its own file; it makes debugging, optimizing, and reading for flow an absolute hell.
+
+The cohesion of a single file should be very high. 
+
+However, if a file contains twenty functions where 12 of them have high cohesion with each other, and the other 8 have high cohesion with each other, but there is low cohesion between these groups, then this is a sign the file should be split up as it actually contains 2 separate (sub-)systems.
+
 #### Method
 Inspired by Eskil Steenberg and Dale, often when I am writing a new system or library, I actually *start* by designing the API rather than the actual implementation (this also helps with TDD). 
 
