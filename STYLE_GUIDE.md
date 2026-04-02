@@ -23,6 +23,7 @@ I started to write this because I thought it would be useful to have a centraliz
 		- [Function Length](#function-length)
 	- [Naming](#naming)
 		- [Length](#length)
+		- [Style](#style)
 	- [Commenting](#commenting)
 		- [Regular Comments](#regular-comments)
 		- [Code Documentation](#code-documentation)
@@ -122,6 +123,24 @@ The goal of an entity's name is to *describe* its essence. Its role is equivalen
 In general, the length of an entity's name is a function of its scope and inherent complexity. A variable that is used only on one line can easily be just a single character (even though I generally avoid this); conversely, a constant that is accessed in a thousand places all over the repo should have a very meaningful name. `RecordOfFinancialInformationContentLengthLimit` would be far better than `ContentLengthLimit`, because we would not be able to infer the actual meaning from the latter. However, if we were working in a *scope* such as a struct describing the financial record configuration `FinancialInformationConfig`, we could name it `ContentLengthLimit` as a field, because the meaning is clearly inferable.
 
 With functions, another axis is required, what it actually does. A specific function should have a specific name, whereas a broad function should have a broad name. `KillProgram` is a good specific name for a function that *only* kills the program. `Compute` can be an example of a proper broad name if the computation is actually determined by the configuration and arguments given to the function.
+
+#### Style
+
+I tend to follow Eskil Steenberg's naming style for functions which means: `<system/module/component><subject><action><optional suffix>`.
+
+An example of this is: `LexerConfigurationSetPatternCompiler` where:
+- `Lexer` 			   refers to the system or module or component
+- `Configuration`	   refers to the subject
+- `SetPatternCompiler` is the action
+
+Another example could be: `LexerCreateFromBinary` where:
+- `Lexer` 	   refers to the system or module or component (in this case it is also the subject)
+- `Create`	   is the action
+- `FromBinary` is the optional suffix
+
+As you can see, the optional suffix allows modification of the action to be made more specific.
+
+The reason we do naming in this way is to make it readable at a glance *where* a certain function is located and comes from. Additionally, by leveraging this standardized way of writing functions, autocomplete becomes very easy because you can traverse the prefix set as a folder tree. Type `Lexer` and (depending on editor) you see all functions related to the lexer, type `Configuration` after and it will filter down to everything to do with the configuration.
 
 ### Commenting
 
