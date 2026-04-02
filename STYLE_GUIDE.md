@@ -220,6 +220,8 @@ DATE: <date of decision>
 
 In the standard ADR (ref:5), rejection status does not exist. I included this such that I don't follow in the same design traps. 
 
+The ADR files follow the naming structure `<number>-<title>.md`, for example `0001-no-lexer-level-token-filtering.md`.
+
 ### Usage of LLMs
 This section will likely be extended in the future.
 
