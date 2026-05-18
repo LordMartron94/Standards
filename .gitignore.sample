@@ -1,0 +1,11 @@
+# Sample gitignore
+
+### --- Build & Output ---
+build/
+logs/
+
+### --- IDE & Editor Specific ---
+.cursor/
+
+### --- Test Artifacts ---
+results/tests/
