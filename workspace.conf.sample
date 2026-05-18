@@ -1,0 +1,33 @@
+# Workspace config sample (used for sync workspace)
+
+# DIR           NAME            GIT_NAME        GITHUB_NAME
+infra			standards		standards		-
+
+# ---------------------- CORE ----------------------
+libs			foundation		foundation		Foundation
+libs 			essence			essence			Essence
+libs 			echo			echo			Echo
+
+# ---------------------- MEMORY ----------------------
+libs			memcore			memcore			Memcore
+libs			memforge		memforge		Memforge
+libs 			memstruct		memstruct		Memstruct
+libs			memarch			memarch			Memarch
+
+# ------------------- COMPUTATION -------------------
+libs			blaze			blaze			Blaze
+libs			statarch		statarch		Statarch
+
+# ------------------- DAG & Nodes -------------------
+libs			structarch		structarch		Structarch
+
+# ---------------------- STORAGE ----------------------
+libs			persistence		persistence		Persistence
+
+# --------------- RENDERING & DIAGNOSTICS -------------
+libs 			signal			signal			Signal
+libs			splash			splash			Splash
+
+# ---------------------- TOOLS ----------------------
+tools			shield			shield			-
+tools			anvil			anvil			-
