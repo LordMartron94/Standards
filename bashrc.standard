@@ -9,3 +9,17 @@ project_clean() {
     echo "Cleaning project artefacts in $CURRENT_PROJECT_ROOT..."
     find "$CURRENT_PROJECT_ROOT" -name "*.tmp" -delete
 }
+
+if ! mtype _helm &>/dev/null; then
+
+    _helm() {
+        local helm_bin
+        helm_bin="$(command -v helm 2>/dev/null)" || return
+
+        mapfile -t COMPREPLY < <(
+            COMP_CWORD="${COMP_CWORD}" "${helm_bin}" __complete -- "${COMP_WORDS[@]}" 2>/dev/null
+        )
+    }
+
+    complete -F _helm helm
+fi
