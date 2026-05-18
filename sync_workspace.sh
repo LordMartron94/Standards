@@ -18,15 +18,16 @@ while read -r dir name git_name github_name || [[ -n "$dir" ]]; do
     self_hosted_url="ssh://git@localhost:22222/home/git/git-repos/${git_name}.git"
 
     # 1. Submodule Initialization / Addition
-    if [[ ! -d "${target_path}/.git" ]]; then
+if ! git ls-files --error-unmatch "${target_path}" &>/dev/null; then
         echo "➜ Adding submodule: ${target_path}"
         git submodule add "${self_hosted_url}" "${target_path}"
     else
-        echo "✔ Verified submodule: ${target_path}"
-        # Optional: Pull latest from the tracked remote branch
-        # git submodule update --remote --init "${target_path}"
+        echo "✔ Verified submodule index: ${target_path}"
+        if [[ ! -e "${target_path}/.git" ]]; then
+            echo "  ➜ Initializing missing payload..."
+            git submodule update --init "${target_path}"
+        fi
     fi
-
     # 2. Public Branch & Remote Wiring
     if [[ -n "${github_name}" && "${github_name}" != "-" ]]; then
         public_url="git@github.com:LordMartron94/${github_name}.git"
