@@ -1,0 +1,170 @@
+/*
+This is a sample helm file useful to copy into new projects.
+*/
+
+BUILD_DIR = "build"
+DEV_BIN_DIR = "build/dev-bin"
+LOGS_DIR = "logs"
+
+ID_GEN_BINARY = "build/dev-bin/essence_cli"
+
+SHIELD_BINARY = "build/dev-bin/shield_cli"
+SHIELD_CONFIG = "shield_config.toml"
+
+target generate_generic() {
+    help = "Run go generate for standard Go modules (Natively Cached)"
+
+    matrix MOD in [
+        "libs/autarch",
+		"libs/blaze",
+		// ... fill with all libraries and tools that need generation
+    ]
+
+    artifacts {
+        inputs = [
+            glob("${MOD}", include="**/*.go", exclude="**/*_gen.go", exclude="**/*_string.go"),
+            glob("${MOD}", include="**/*.sql"),
+            glob("${MOD}", include="**/*.proto")
+        ]
+        outputs = [
+            glob("${MOD}", include="**/*_gen.go"),
+            glob("${MOD}", include="**/*_string.go")
+        ]
+    }
+
+    run "sh -c 'cd ${MOD} && go generate ./...'"
+}
+
+// Uncomment if you need language parsing:
+
+// target generate_lspec() {
+//     help = "Run go generate for LSPEC toolchain modules (Natively Cached)"
+
+//     matrix MOD in [
+//         "libs/lingua/go",
+//         "libs/lingua/helm",
+//         "libs/lingua/ruleforge",
+//     ]
+
+//     artifacts {
+//         inputs = [
+//             glob("${MOD}", include="**/*.lspec"),
+//             glob("${MOD}", include="**/*.go", exclude="**/*_gen.go", exclude="artifacts/*"),
+//             glob("libs/lexarch", include="**/*.go"),
+//             glob("libs/syntaxa", include="**/*.go"),
+//             glob("libs/langspec", include="**/*.go"),
+//             glob("libs/lingua/internal", include="**/*.go"),
+//             glob("libs/lingua/lspec_std", include="**/*"),
+//         ]
+//         outputs = [
+//             glob("${MOD}", include="artifacts/*")
+//         ]
+//     }
+
+//     run "sh -c 'cd ${MOD} && go generate ./...'"
+// }
+
+target generate() {
+    help = "Generate all modules across the repository"
+    
+    artifacts {
+    	volatile = true
+    }
+
+    depends_on [ 
+        generate_generic
+        // generate_lspec
+    ]
+}
+
+target build_shield_cli() {
+	help = "Build SHIELD CLI (Makefile: SHIELD_BINARY)"
+
+	depends_on [ generate ]
+
+	artifacts {
+		inputs = glob("tools/shield", include="**/*.go")
+		outputs = [ "${SHIELD_BINARY}" ]
+	}
+
+	run "mkdir -p ${DEV_BIN_DIR}"
+	run "go build -o ${SHIELD_BINARY} ./tools/shield/cmd/"
+}
+
+target build_id_gen() {
+	help = "Build Essence ID generator (Makefile: ID_GEN_BINARY)"
+
+	depends_on [ generate ]
+
+	artifacts {
+		inputs = glob("libs/essence/cli", include="**/*.go")
+		outputs = [ "${ID_GEN_BINARY}" ]
+	}
+
+	run "mkdir -p ${DEV_BIN_DIR}"
+	run "go build -o ${ID_GEN_BINARY} ./libs/essence/cli"
+}
+
+target shield(SHIELD_FLAGS?) {
+	help = "Run SHIELD (Makefile: shield)"
+
+	depends_on [ build_shield_cli ]
+
+	interactive = true
+
+	artifacts {
+		volatile = true
+	}
+
+	run "${SHIELD_BINARY} -configuration-path=${SHIELD_CONFIG} ${SHIELD_FLAGS}"
+}
+
+target gen_id() {
+	help = "Run Essence ID generator (Makefile: gen-id)"
+
+	depends_on [ build_id_gen ]
+
+	artifacts {
+		volatile = true
+	}
+
+	run "${ID_GEN_BINARY}"
+}
+
+target tidy_modules() {
+    help = "Run go mod tidy in all workspace modules in parallel"
+    
+    matrix MOD in [
+    	"src",
+    ]
+
+    artifacts {
+        volatile = true 
+    }
+
+    run "sh -c 'cd ${MOD} && go mod tidy'"
+}
+
+target refresh_vendor() {
+    help = "Sync workspace and reconstruct the vendor directory"
+    
+    depends_on [ tidy_modules ]
+
+    artifacts {
+        volatile = true
+    }
+
+    run "sh -c 'go work sync && rm -rf vendor && go work vendor && echo \"✅ Vendor refresh complete.\"'"
+}
+
+target sync_workspace() {
+    help = "Initializes and synchronizes all Git submodules from workspace.conf"
+    
+    artifacts {
+        volatile = true 
+    }
+
+    run "git submodule update --init --recursive infra/standards"
+    run "sh -c 'cd infra/standards && git checkout master && git pull origin master'"
+    run "./infra/standards/sync_workspace.sh"
+}
