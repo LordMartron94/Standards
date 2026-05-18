@@ -5,6 +5,8 @@
 # Project-Specific Aliases
 alias fmt='go fmt ./...'
 
+export PATH="$PATH:$HOME/go/bin"
+
 project_clean() {
     echo "Cleaning project artefacts in $CURRENT_PROJECT_ROOT..."
     find "$CURRENT_PROJECT_ROOT" -name "*.tmp" -delete
