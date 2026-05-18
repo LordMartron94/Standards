@@ -172,6 +172,14 @@ Depending on the scope and complexity of the entity, your documentation must def
 - **Deprecation Notices:** Timelines for removal and the exact alternative developers must use.
 - **ADR Links:** If applicable, one can link to a relevant entry in the ADR docs for more context behind a decision.
 
+There should be NO blank lines between sentences unless it is a paragraph break, otherwise it becomes unreadable.
+
+##### Go
+
+In Go, the `//` is used for standard comments and the `/* */` syntax is used for code-docs.
+
+I differentiate in this way because of my editor syntax highlighting setup.
+
 ##### Example Documentation Format
 
 ```typescript
