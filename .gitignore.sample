@@ -6,6 +6,8 @@ logs/
 
 ### --- IDE & Editor Specific ---
 .cursor/
+*.sublime-workspace
+*.sublime-project
 
 ### --- Test Artifacts ---
 results/tests/
