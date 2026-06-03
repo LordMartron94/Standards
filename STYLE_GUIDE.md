@@ -1,6 +1,6 @@
 # STYLE GUIDE
 
-Current version: 0.1.0
+Current version: 0.1.1
 
 ---
 
@@ -141,6 +141,11 @@ Another example could be: `LexerCreateFromBinary` where:
 As you can see, the optional suffix allows modification of the action to be made more specific.
 
 The reason we do naming in this way is to make it readable at a glance *where* a certain function is located and comes from. Additionally, by leveraging this standardized way of writing functions, autocomplete becomes very easy because you can traverse the prefix set as a folder tree. Type `Lexer` and (depending on editor) you see all functions related to the lexer, type `Configuration` after and it will filter down to everything to do with the configuration.
+
+For unexported functions in a (sub)package, I adopt a convention since 03 June 2026 which indicates whether a function should be referenced outside a file.
+
+p_* indicates the function is private to the file and should not be called outside.
+i_* indicates the function is internal and can be used anywhere within the module. 
 
 ### Commenting
 
@@ -292,6 +297,9 @@ My overall references for my programming principles come from Eskil Steenberg an
 5. [Martin Fowler: "Architecture Decision Record"](https://martinfowler.com/bliki/ArchitectureDecisionRecord.html)
 
 ## Changelog
+
+### 03 June 2026
+- Add note to naming about p_* vs i_*
 
 ### 02 April 2026
 - First Release
