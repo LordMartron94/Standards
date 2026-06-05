@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://json.schemastore.org/clang-tidy.json
+
+Checks: >
+  -*,
+
+  bugprone-*,
+  -bugprone-exception-escape,
+  -bugprone-forwarding-reference-overload,
+  -bugprone-lambda-function-name,
+  -bugprone-macro-repeated-side-effects,
+
+  cert-*,
+  -cert-dcl21-cpp,
+  -cert-err58-cpp,
+
+  clang-analyzer-*,
+
+  misc-*,
+  -misc-non-private-member-variables-in-classes,
+  -misc-use-anonymous-namespace,
+
+  performance-*,
+  -performance-unnecessary-value-param,
+
+  portability-*,
+
+  readability-*,
+  -readability-braces-around-statements,
+  -readability-identifier-naming,
+  -readability-magic-numbers,
+  -readability-named-parameter,
+  -readability-uppercase-literal-suffix,
+
+  -modernize-*,
+  -cppcoreguidelines-*,
+  -hicpp-*,
+  -llvm-*,
+  -google-*
+
+WarningsAsErrors: "bugprone-use-after-move,clang-analyzer-core.NullDereference"
+HeaderFilterRegex: ".*"
+FormatStyle: "llvm"
