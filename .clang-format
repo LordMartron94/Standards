@@ -5,7 +5,7 @@ BasedOnStyle: LLVM
 IndentWidth: 2
 TabWidth: 2
 UseTab: Never
-ColumnLimit: 120
+ColumnLimit: 150
 
 BreakBeforeBraces: Attach
 
@@ -23,3 +23,5 @@ AlignConsecutiveMacros: Consecutive
 
 PointerAlignment: Right
 IndentPPDirectives: AfterHash
+
+AllowShortEnumsOnASingleLine: false
