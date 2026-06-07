@@ -1,8 +1,37 @@
 #!/bin/sh
 set -eu
 
+DEBUG=0
+
+diagnostic() {
+    if [ "$DEBUG" -eq 1 ]; then
+        echo "$@" >&2
+    fi
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --debug|-d)
+            DEBUG=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            echo "Usage: $0 [--debug|-d] <output_compile_commands.json> <input_graph_dump.json>" >&2
+            echo "[ERROR] Unknown option: $1" >&2
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
 if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 <output_compile_commands.json> <input_graph_dump.json>" >&2
+    echo "Usage: $0 [--debug|-d] <output_compile_commands.json> <input_graph_dump.json>" >&2
     exit 1
 fi
 
@@ -19,11 +48,11 @@ if [ ! -f "$INPUT_GRAPH" ]; then
     exit 1
 fi
 
-echo "[DIAGNOSTIC] --- Starting Helm Graph Parse ---" >&2
+diagnostic "[DIAGNOSTIC] --- Starting Helm Graph Parse ---"
 
 TOTAL_TARGETS=$(jq '.targets | length' "$INPUT_GRAPH")
 ENTITY_COUNT=$(jq '(.entities? // {}) | length' "$INPUT_GRAPH")
-echo "[DIAGNOSTIC] Targets: $TOTAL_TARGETS, entities: $ENTITY_COUNT" >&2
+diagnostic "[DIAGNOSTIC] Targets: $TOTAL_TARGETS, entities: $ENTITY_COUNT"
 
 jq '
   def is_compile_argv($argv):
@@ -127,4 +156,4 @@ jq '
 ' "$INPUT_GRAPH" > "$OUTPUT_FILE"
 
 FINAL_COUNT=$(jq 'length' "$OUTPUT_FILE")
-echo "[DIAGNOSTIC] Successfully wrote $FINAL_COUNT records to $OUTPUT_FILE" >&2
+diagnostic "[DIAGNOSTIC] Successfully wrote $FINAL_COUNT records to $OUTPUT_FILE"
