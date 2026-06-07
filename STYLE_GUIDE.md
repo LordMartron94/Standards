@@ -1,6 +1,6 @@
 # STYLE GUIDE
 
-Current version: 0.1.1
+Current version: 0.1.2
 
 ---
 
@@ -17,13 +17,18 @@ I started to write this because I thought it would be useful to have a centraliz
 		- [Boundaries](#boundaries)
 		- [Internals](#internals)
 		- [Separation of Concerns](#separation-of-concerns)
+			- [C APIs](#c-apis)
 		- [Method](#method)
 	- [Functions](#functions)
 		- [Functions vs. Methods](#functions-vs-methods)
 		- [Function Length](#function-length)
+	- [Typing](#typing)
 	- [Naming](#naming)
 		- [Length](#length)
 		- [Style](#style)
+			- [General Function Naming](#general-function-naming)
+			- [C Naming Style](#c-naming-style)
+			- [Implicit Access made Explicit](#implicit-access-made-explicit)
 	- [Commenting](#commenting)
 		- [Regular Comments](#regular-comments)
 		- [Code Documentation](#code-documentation)
@@ -93,6 +98,12 @@ The cohesion of a single file should be very high.
 
 However, if a file contains twenty functions where 12 of them have high cohesion with each other, and the other 8 have high cohesion with each other, but there is low cohesion between these groups, then this is a sign the file should be split up as it actually contains 2 separate (sub-)systems.
 
+##### C APIs
+
+When programming in C, I follow Eskil Steenberg's convention of having a single `<system>.h` file that encapsulates the entire API. This hides complexity from clients and avoids clients having to import a dozen different headers in their systems. When the internal source code needs to share types between systems, X number of different `<subsystem>_internal.h` files can be created, which won't be exposed to clients.
+
+This already gives away also that I do not keep all functionality in a single *source file* as opposed to the API in a single *header file*, instead, each (sub-)system gets its own source file.
+
 #### Method
 Inspired by Eskil Steenberg and Dale, often when I am writing a new system or library, I actually *start* by designing the API rather than the actual implementation (this also helps with TDD). 
 
@@ -114,6 +125,26 @@ While Bob Martin recommends splitting functions into those with a single reason 
 
 One reason for this is that having a bunch of separate functions (whether one-liners or not) that are called from within one orchestrator function requires the developer to jump around a dozen calls, or even deep into a chain, in order to understand what is happening. This makes debugging and optimizing a nightmare. Thus the decision behind extracting a function or inlining its behavior at the cost of larger functions is not a real science, it is more an art that requires wisdom and experience.
 
+### Typing
+
+This section serves to give a short overview of information on handling types in languages where applicable.
+
+For example in C, standard code writes the pointer in the typedef, like:
+```c
+typedef void *Handle
+
+void handle_do_something(Handle handle);
+```
+
+To me this is bad programming because it hides the fact that it is a pointer in the typedef, making it implicit.
+Instead, I put the pointer on the usage.
+
+```c
+typedef void Handle
+
+void handle_do_something(Handle *handle);
+```
+
 ### Naming
 In terms of naming, both Bob Martin and Eskil Steenberg agree that wide names are NOT an issue (ref:1,4).
 
@@ -125,6 +156,8 @@ In general, the length of an entity's name is a function of its scope and inhere
 With functions, another axis is required, what it actually does. A specific function should have a specific name, whereas a broad function should have a broad name. `KillProgram` is a good specific name for a function that *only* kills the program. `Compute` can be an example of a proper broad name if the computation is actually determined by the configuration and arguments given to the function.
 
 #### Style
+
+##### General Function Naming
 
 I tend to follow Eskil Steenberg's naming style for functions which means: `<system/module/component><subject><action><optional suffix>`.
 
@@ -142,6 +175,22 @@ As you can see, the optional suffix allows modification of the action to be made
 
 The reason we do naming in this way is to make it readable at a glance *where* a certain function is located and comes from. Additionally, by leveraging this standardized way of writing functions, autocomplete becomes very easy because you can traverse the prefix set as a folder tree. Type `Lexer` and (depending on editor) you see all functions related to the lexer, type `Configuration` after and it will filter down to everything to do with the configuration.
 
+One other thing that is useful to keep in mind is to be *consistent* with naming, as it makes grasping code at a glance far easier. For example, when using `get` and `set` in X places, don't use `retrieve` and `adjust` in Y other places, **unless it clearly means something semantically different**. In line with this, it is a bad idea to use asymmetric names like `retrieve` and `set`, because a `set` implies a `get` purely linguistically. 
+
+##### C Naming Style
+
+My naming style in C is not very different from what I said above. However, I formalize my casing and style here.
+
+Functions:			snake_case
+Variables:			snake_case
+Struct types:		PascalCase
+Enum types:			PascalCase
+Function typedefs:	PascalCase
+Macros:				SCREAMING_SNAKE_CASE
+
+##### Implicit Access made Explicit
+-- such as in Go
+
 For unexported functions in a (sub)package, I adopt a convention since 03 June 2026 which indicates whether a function should be referenced outside a file.
 
 p_* indicates the function is private to the file and should not be called outside.
@@ -156,7 +205,7 @@ When refactoring is impossible or insufficient, inline comments are strictly lim
 
 - **Algorithmic Context:** Explanations for highly complex, mathematically dense, or counter-intuitive logic that cannot be simplified or made self-evident through code alone.
 - **Regression Warnings:** Critical warnings regarding non-obvious side effects, edge cases, or workarounds for third-party bugs (e.g., "Do not reorder this execution; function X relies on the mutated state of Y").
-- **Structural Separators:** High-level section dividers within a file (e.g., separating Types, Interfaces, and Implementations). *Note: If a file requires extensive sectioning to remain readable, it is a strong indicator that the module is too large and should be split into smaller, focused files.* 
+- **Structural Separators:** High-level section dividers within a file (e.g., separating Types, Interfaces, and Implementations).
 
 #### Code Documentation
 Code documentation exists to explain the *why* and *how* of an entity, as the code itself already dictates the *what*. Documentation must be written for every public-facing entity (types, functions, classes, etc.). It is equally critical for internal entities where business logic, state mutation, or non-obvious constraints exist. You only skip documentation if the code is genuinely self-explanatory. See also: [API Design](#api-design).
@@ -297,6 +346,13 @@ My overall references for my programming principles come from Eskil Steenberg an
 5. [Martin Fowler: "Architecture Decision Record"](https://martinfowler.com/bliki/ArchitectureDecisionRecord.html)
 
 ## Changelog
+
+### 07 June 2026
+- Formalize C naming scheme
+- Add information about C pointers
+- Removed phrase about separating code into focused files (structural separators) since it does not fit my philosophy
+- Add paragraph about consistency in naming to naming style section
+- Add section on C API composition
 
 ### 03 June 2026
 - Add note to naming about p_* vs i_*
