@@ -1,6 +1,6 @@
 # STYLE GUIDE
 
-Current version: 0.1.2
+Current version: 0.1.3
 
 ---
 
@@ -22,6 +22,7 @@ I started to write this because I thought it would be useful to have a centraliz
 	- [Functions](#functions)
 		- [Functions vs. Methods](#functions-vs-methods)
 		- [Function Length](#function-length)
+	- [Error Handling](#error-handling)
 	- [Typing](#typing)
 	- [Naming](#naming)
 		- [Length](#length)
@@ -124,6 +125,18 @@ An exception to this principle is fluent APIs/builder-like patterns. For chainin
 While Bob Martin recommends splitting functions into those with a single reason to change (SRP) (ref:4), often very tiny functions, I do not keep myself to this guideline all the time. In general this is beneficial, however, as Eskil Steenberg says: "code should *do* something, it should not *manage* something." (not verbatim)... In other words, as soon as you get a function that only calls a bunch of other functions, you are doing something wrong. (ref:1)
 
 One reason for this is that having a bunch of separate functions (whether one-liners or not) that are called from within one orchestrator function requires the developer to jump around a dozen calls, or even deep into a chain, in order to understand what is happening. This makes debugging and optimizing a nightmare. Thus the decision behind extracting a function or inlining its behavior at the cost of larger functions is not a real science, it is more an art that requires wisdom and experience.
+
+### Error Handling
+
+A paradigm that is prevailing in modern times (I am looking at you Go) is to return errors from most functions. This forces code that wants to be "resilient" to need to check for a whole bunch of errors, and in languages that support exception-like systems, also exceptions. This complicates designs needlessly for edge-cases that rarely happen, or at least should happen rarely.
+
+I opt for a different approach to truly resilient code, inspired by Eskil Steenberg's principle of failing hard and loud during development. What I do instead is classify errors into two groups, which decide how to handle potential errors.
+1: Programmer Errors / Invariant Violations
+2: User Errors (direct or indirect)
+
+For programmer errors or invariant violations, it is dumb to return an error-code. Programmers should know better than to break the invariant of the code they call/use, especially when they wrote it themselves. As such, for these I use my own written assertions that ensure invariants are correctly kept, if not, they CRASH hardly and loudly, while giving as much diagnostic information as possible. When this crash inevitably happens, I immediately fix it. Most of these asserts are not compiled in release mode, but some I might keep alive for really critical areas.
+
+User errors on the other hand are both unexpected and expected at the same time. Unexpected because we cannot plan for them all and expected because they are guaranteed to happen. Such issues should return clear error codes so that client code can choose how to handle it. 
 
 ### Typing
 
@@ -346,6 +359,9 @@ My overall references for my programming principles come from Eskil Steenberg an
 5. [Martin Fowler: "Architecture Decision Record"](https://martinfowler.com/bliki/ArchitectureDecisionRecord.html)
 
 ## Changelog
+
+### 11 June 2026
+- Add section on error handling
 
 ### 07 June 2026
 - Formalize C naming scheme
