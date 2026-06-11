@@ -18,6 +18,7 @@ Checks: >
   misc-*,
   -misc-non-private-member-variables-in-classes,
   -misc-use-anonymous-namespace,
+  -misc-no-recursion,
 
   performance-*,
   -performance-unnecessary-value-param,
@@ -26,10 +27,10 @@ Checks: >
 
   readability-*,
   -readability-braces-around-statements,
-  -readability-identifier-naming,
   -readability-magic-numbers,
   -readability-named-parameter,
   -readability-uppercase-literal-suffix,
+  -readability-function-cognitive-complexity,
 
   -modernize-*,
   -cppcoreguidelines-*,
@@ -40,3 +41,44 @@ Checks: >
 WarningsAsErrors: "bugprone-use-after-move,clang-analyzer-core.NullDereference"
 HeaderFilterRegex: ".*"
 FormatStyle: "llvm"
+
+CheckOptions:
+  - key: readability-identifier-length.IgnoredVariableNames
+    value: "i|j|k"
+
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: lower_case
+
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+
+  - key: readability-identifier-naming.PublicMemberCase
+    value: lower_case
+
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+
+  - key: readability-identifier-naming.LocalVariableCase
+    value: lower_case
+
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.TypedefCase
+    value: CamelCase
+  - key: readability-identifier-naming.TypedefIgnoredRegexp
+    value: "(uint8|uint16|uint32|uint64|int8|int16|int32|int64|f_real|boolean|real32|real64|byte|timestamp)$"
+
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.MacroDefinitionIgnoredRegexp
+    value: "(malloc|realloc|free|echo_message_[a-z0-9_]+)$"

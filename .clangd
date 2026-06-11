@@ -2,7 +2,6 @@
 
 CompileFlags:
   Remove:
-    - "-std=c*"
     - "-std=gnu*"
     - "-O3"
     - "-Werror"
