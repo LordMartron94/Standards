@@ -6,7 +6,9 @@
 alias fmt='go fmt ./...'
 
 export PATH="$PATH:$HOME/go/bin"
-export PATH="$HOME/.local/opt/llvm/bin:$PATH"
+
+alias clang="~/.local/opt/llvm/bin/clang"
+alias clang++="~/.local/opt/llvm/bin/clang++"
 
 project_clean() {
     echo "Cleaning project artefacts in $CURRENT_PROJECT_ROOT..."
