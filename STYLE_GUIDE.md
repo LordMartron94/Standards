@@ -1,368 +1,281 @@
-# STYLE GUIDE
+# Mr. Hoorn's Programming Philosophy & Style Guide
 
-Current version: 0.1.4
+Current version: 1.0.0
 
 ---
 
-This file contains my personally written style guide for proper software engineering.
+## PREAMBLE
+
+This file contains my personally written style guide and philosophy for proper software engineering.
 
 I started to write this because I thought it would be useful to have a centralized place for my own programming philosophy, which others contributing can benefit from, whether they are human or LLM.
 
+### Style of the Style Guide
+
+This document is broken up in several meaningful and logical sections outlined in the [table of contents](#table-of-contents). 
+
+Because I am not just a programmer but also a researcher and thinker, I include rigorous references where applicable and I also clearly define my terminology where necessary (this is the logician and intellectual inside of me). For some this "pedanticness" might be too much, in which case, feel free to skip over such explanations; however, do not complain that you then do not understand my substance.
+
+For external references one can visit the [references block](#references), however, by no means is this list complete. Because my overall programming knowledge is crystallized over time, often without direct source attributions through experience, conversation, etc.
+
+When there is a specific source to thank for something I list it in the reference section with a number and refer to it in the document using the ^x syntax where `x` represents the source number.
+
 ---
 
-## Table of Contents
-- [Philosophy](#philosophy)
-- [Mechanics](#mechanics)
-	- [API Design](#api-design)
-		- [Boundaries](#boundaries)
-		- [Internals](#internals)
-		- [Separation of Concerns](#separation-of-concerns)
-			- [C APIs](#c-apis)
-		- [Method](#method)
-	- [Functions](#functions)
-		- [Functions vs. Methods](#functions-vs-methods)
-		- [Function Length](#function-length)
-	- [Error Handling](#error-handling)
-	- [Typing](#typing)
-	- [Naming](#naming)
-		- [Length](#length)
-		- [Style](#style)
-			- [General Function Naming](#general-function-naming)
-			- [C Naming Style](#c-naming-style)
-			- [Implicit Access made Explicit](#implicit-access-made-explicit)
-	- [Commenting](#commenting)
-		- [Regular Comments](#regular-comments)
-		- [Code Documentation](#code-documentation)
-			- [Example](#example-documentation-format)
-	- [ADR](#adr)
-		- [Example](#adr-example)
-	- [Usage of LLMs](#usage-of-llms)
-	- [Testing & Benchmarking](#testing-and-benchmarking)
+## TABLE OF CONTENTS
+
+**Content:**
+- [The Core](#core-principle)
+	- [Language Features](#language-features)
+	- [Adaptation](#adapation)
+		- [MACRO: Intersystemic Resilience](#macro-intersystemic-resilience)
+		- [MICRO: Inner Resilience](#micro-inner-resilience)
+- [Operation](#operation)
+	- [Black-Box Modules](#black-box-modules)
+	- [Dependency Management](#dependency-management)
+		- [Insulation](#insulation)
+		- [Dependability](#dependability)
+	- [Rewriting vs. Refactoring](#rewriting-vs-refactoring)
+	- [Style](#style)
+		- [Locality of Behavior](#locality-of-behavior)
+		- [Naming](#naming)
+		- [Casing](#casing)
+	- [Quality Assurance](#quality-assurance)
+		- [Error Handling](#error-handling)
+		- [Testing and Validation](#testing-and-validation)
+
+**Additional Information:**
+- [Definitions](#definitions)
+- [Mentors](#mentors)
 - [References](#references)
+- [Extra](#extra)
+	- [Luhmannian Systems Theory](#luhmannian-systems-theory)
+
+**Post-Content:**
 - [Changelog](#changelog)
 
-## Philosophy
+---
 
-Overall my philosophy boils down to a few principles (which might be extended/refined in the future):
-- **Explicit > Implicit**: even if explicit means writing more code, it makes it infinitely more readable and debuggable, magic is not allowed.
-- **Control > Results**: As Eskil Steenberg always says: in the beginning all you want is results, in the end all you want is control (ref:1). As such, I prefer building my own solutions to using 3rd party solutions (except in certain specific contexts). 
-	- And when using external dependencies out of your control (with the exception of standard library usually), it is adviced to *wrap* the method so that if the dependency breaks the API contract on an update, you only have one place to adjust, and not hundreds spread around your application.
-	- This wrapping idea can also be used when you require another library you built in another library, but this is not always useful. It depends on how often you break/refactor API contracts (which is generally a bad thing to do).
-- **Learning > Efficiency**: In line with the previous principle, I also prefer gaining deep mastery over what might potentially be the more efficient approach. This is another reason why I often "reinvent" the wheel.
-- **Performance is a Must**: Good software is not just functional, it is also performant. This means that most of the stuff I write is profiled and benchmarked to be as optimized as it can be (relative to the context). This does not limit itself to speed, but also memory consumption.
-- **Embrace Complexity**: By taking the philosophy to design your own solutions, you take full control of the process, but also full responsibility. Do not delegate to tomorrow what can be done today. When designing a system, really think what the core features are that the system needs, even if the current project does not necessarily rely on them, and implement them properly.
-	- Some features might be optional/advanced and don't need to be there in the first iteration but can be extended later.
-- **Rewriting > Refactoring**: A lot of times, rewriting a library/system from scratch is a better solution than refactoring the current version, even if it is highly complex and contains thousands of lines of code. Why? Because when rewriting you have a far better idea of the edge-cases, invariants, bugs, performance bottlenecks, design goals/constraints, etc., than when you started out. Thus rewriting from scratch results in a far better architecture. 
-	- In short: *rewriting is treating the disease*, *refactoring is treating the symptom*.
-	- Of course this is contextual, a small issue might not require an entire rewrite. 
+## The Core
 
-I often say: "If you truly want to master something, you need to understand the *why* behind the *how*".
+At the epicenter of my programming philosophy stands the concept of *resilience*. What do I mean by resilience? For this we first need to take a look at the actual definitions for the term, before I can explain how I use it.
 
-The `why` here refers to two different things:
-1. Why something is important (the reasons behind it).
-2. Why something functions the way it does.
-	- This includes why certain decisions were made.
-	
-Building something from scratch is one of the best, if not the only, way to properly get a feeling for that second definition, especially to understand why there are certain constraints, perhaps because of running into X issue.
+Resilience, means, according to the American Heritage Dictionary of the English Language (5th edition):
+> "The ability to recover quickly from illness, change, or misfortune; buoyancy"
+> ^1
 
-Shameless sideplug: My main ambitions have to do with education and learning, so I do a lot of research into neurocognitive educational science. For a look into that, check out [The Mind Academy Discord community](https://discord.gg/cvd8gUdukj), we have around 600 members interested in metacognition and learning.
+To be resilient is described as:
+> "Able to recover readily, as from misfortune."
+> ^2
 
-## Mechanics
+To me, the greatest goal of developing any software is to ensure it **lasts as long as possible**, ideally without significant (manual) intervention. Having a resilient codebase makes this possible. While creating unbreakable code is the end-goal, there can be no unbreakable code without the capacity to bend. Steel is strong, but it can break. Elastic is not strong per se, but it rarely breaks from pressure because it bends. So how does this come together? By creating code that is *clear*, *readable*, *validated*, and *debuggable*, we create the very mechanisms that ensure when something fails, we know as soon as possible what the precise cause is and can come up with a solution very quickly. 
 
-### API Design
-The core principle of API design is that consumers / clients must not be aware of internal complexity. As such, in Go, all functionality lives inside the special `internal` subpackage. APIs only provide thin facades delegating to that internal complexity. Sometimes, APIs provide thin wrappers around internal functionality to provide some additional ergonomics, but this is not always the case.
+All decisions and principles for the style guide and philosophy flow from this single maxim of maximum code resilience. In case of a design issue which is not explicitly defined in the philosophy, we can weigh approaches based on how much it aids or detriments the overall resilience of the codebase.
 
-#### Boundaries
-To be able to fully re-use written infrastructure and code as much as I can, each piece of code is put inside a dedicated library. Each of these libraries has clear boundaries that define:
-- What it does
-- What it does NOT
+### Language Features
+Because the ultimate goal for a codebase is to remain as long as possible without breaking, I adhere to Steenberg's notion of Dependable C, which is (a subset of) C89 (^8).
 
-I try to define these boundaries, and as consequence the library names, as flexibly as possible, allowing growth, while not becoming too broad. The only exception to this is my [foundation](https://github.com/LordMartron94/Foundation) library, as it purely houses some logic common almost all of my libraries. As such, foundation has no external dependencies. But in all other cases, libraries have clearly defined boundaries. 
+The main benefit is that code written in this way will work on virtually any system for decades to come.
 
-#### Internals
-Following from the core API Design principle that clients must not be aware of internal complexity, it also means that clients should not have to know about *how* a library or system functions in order to use it. This is to say, they should NOT have to look into the source code of the library to understand why something behaves a certain way. The API should make it clear, see also: [code documentation](#code-documentation).
+### Adaptation
+> Perfection does not exist, but what is optimal is that which constantly approaches perfection.
 
-In short: from the client/consumer's perspective, a library or system must be a *black box*. (ref:2,3)
+Colonel John Boyd famously said: 
+> "Any system that does not have an inherent capacity to change [and thus evolve] is doomed to fail."
+> ^3
+> 
+> Note: I am not sure whether this appears verbatim in the source, but I remember having heard/read this quote at some point and it is most likely here.
 
-#### Separation of Concerns
-As stated in the boundaries section, I clearly separate logic between libraries... By extent, the result, when executed properly, is that most of code is re-usable, and this means that client projects (tools, programmes, etc.), should not have a lot of code; all it should do is "glue" the libraries and kits together. (ref:2,3)
+Because of this principle, in order to ensure our codebase is not just strong, but also bendable, we need to build specific mandates that ensure our systems keep operating on the optimal state they can at that point in time. In order to achieve this state of excellence, I draw on systems theory from two sources, Boyd's OODA loop (^3) and Luhmann's functionally differentiated systems theory (^4, ^5, ^6, ^7) (note: see [Luhmannian Systems Theory](#luhmannian-systems-theory) for a quick primer on this subject).
 
-The only thing that is plausible to put in client projects aside from glue code is domain-specific logic. However, even when putting that there, it is good to reflect and see whether that domain-specific logic can be abstracted and generalized and put in a library to be re-used elsewhere.
+The core mechanism that will ensure this continuous adaptation is Boyd's OODA loop, which dictates the sequence: Observe, Orient, Decide, and Act. 
 
-The first instinct must ALWAYS be to make systems re-usable. 
+When integrated with the systemic principles outlined previously, the synthesis operates as follows:
+- Luhmann's systems theory provides the *structural blueprint* for a resilient system, dictating operationally closed, black-box modules that effectively reduce environmental complexity.
+- Boyd's OODA loop provides the *temporal engine* to ensure the system constantly evolves, preventing the entropy that inevitably degrades closed systems that fail to interact with their external reality.
 
-Similar to this, code that is part of the same (sub-)system should virtually always be put in the same file such that understanding it does not require a dozen or so jumps, or different files. See also: [function length](#function-length).
+Across various scales of architecture, distinct procedures apply to implement this iterative loop. Note that the boundaries between macro and micro levels are inherently permeable in practical design; it is the prerogative of the engineer to determine the precise operational context at any given moment.
 
-In my codebases, do not be afraid to find files of 1k+ or even 3k+ lines of code. I dislike fragmented codebases where every single piece of functionality is contained in its own file; it makes debugging, optimizing, and reading for flow an absolute hell.
+#### MACRO Intersystemic Resilience
 
-The cohesion of a single file should be very high. 
+On the macro level, resilience is defined by how effectively our sovereign architecture interacts with, and insulates itself from, external systems and third-party dependencies within the broader environment.
 
-However, if a file contains twenty functions where 12 of them have high cohesion with each other, and the other 8 have high cohesion with each other, but there is low cohesion between these groups, then this is a sign the file should be split up as it actually contains 2 separate (sub-)systems.
+**Observe:**
+We monitor the execution and integration of specific interfaces and external APIs within our systemic environment. This observation yields critical physical feedback signals, such as identifying an API that introduces excessive friction, recognizing an external dependency that frequently violates its contract, or noting a systemic boundary that has become overly complex and obfuscated.
 
-##### C APIs
+**Orient:**
+We process these feedback signals to comprehend the mismatch between our system's operational requirements and the external environment's reality. We evaluate this friction against our foundational principles of absolute control and dependency insulation, synthesizing our prior experiences, domain knowledge, and potential architectural alternatives to update our mental model of the system's structural integrity.
 
-When programming in C, I follow Eskil Steenberg's convention of having a single `<system>.h` file that encapsulates the entire API. This hides complexity from clients and avoids clients having to import a dozen different headers in their systems. When the internal source code needs to share types between systems, X number of different `<subsystem>_internal.h` files can be created, which won't be exposed to clients.
+**Decide:**
+We formulate a structural hypothesis to resolve the observed friction. Because our modules must operate as strictly encapsulated black boxes, we may decide to execute a complete rewrite of the underlying module, design a new upfront communication format, construct a rigid custom wrapper to fully insulate our core codebase, or sever a third-party dependency entirely to replace it with a bespoke solution. We may also decide to defer action until later and instead note down the friction and potential resolutions.
 
-This already gives away also that I do not keep all functionality in a single *source file* as opposed to the API in a single *header file*, instead, each (sub-)system gets its own source file.
+**Act:**
+We implement the architectural modification and deploy the new boundary. This physical deployment serves as a strict empirical test of our structural hypothesis, perturbing the systemic environment and generating fresh interactions that feed directly back into the Observation phase to validate whether systemic friction has been successfully eradicated.
 
-#### Method
-Inspired by Eskil Steenberg and Dale, often when I am writing a new system or library, I actually *start* by designing the API rather than the actual implementation (this also helps with TDD). 
 
-This results in a few very useful things when developing complex software:
-- It requires knowing WHAT the library/system should do.
-- It requires knowing WHAT the transformations will be (input x -> output y).
-- It ensures ergonomics are thought of beforehand, preventing awkward refactors of internals later.
-- It facilitates development of testing because you design the required behaviors upfront.
+#### MICRO Inner Resilience
 
-### Functions
+On the micro level, resilience is defined by the internal structural integrity of the implementation, most notably measured by how debuggable, explicit, readable, optimized, and predictably the code responds to failure.
 
-#### Functions vs. Methods
-Unlike C, higher level languages often have the capability to attach methods directly to objects. I explicitly do NOT use this approach. On the hardware level, data and execution are strictly separated, there are no mixed layers. For this reason, it is useful to keep data and method distinct on the source code level as well, for the proper mindset. Additionally, when using methods rather than free functions, it is far easier to hide side-effects implicitly, whereas if you use a free function, you clearly see what arguments it takes and potentially whether they will be mutated or not (ref vs. value).
+Note that the demarcation becomes blurry here, as a micro-level implementation can define a new systemic environment by incorporating new subsystems, thus generating a novel macro context.
 
-An exception to this principle is fluent APIs/builder-like patterns. For chaining it makes sense to sometimes use methods in order to return the same object to chain. But this is virtually the only usecase where I implement a method rather than free function.
+**Observe:**
+We execute the software and actively seek out physical feedback. This involves looking for hard, loud failures during development, such as triggered assertions, runtime traps, or deliberate memory seeding patterns. Furthermore, we observe the system's operational characteristics by running automated test suites, executing profiling tools to monitor memory and execution paths, and benchmarking performance metrics.
 
-#### Function Length
-While Bob Martin recommends splitting functions into those with a single reason to change (SRP) (ref:4), often very tiny functions, I do not keep myself to this guideline all the time. In general this is beneficial, however, as Eskil Steenberg says: "code should *do* something, it should not *manage* something." (not verbatim)... In other words, as soon as you get a function that only calls a bunch of other functions, you are doing something wrong. (ref:1)
+**Orient:**
+We process these signals—whether they are crash dumps, test failures, or profiling data—to reconcile our inherently flawed mental model of the software with its actual physical execution. We pinpoint the exact locus of a malfunction or bottleneck, determining whether the failure is a programmer error violating a strict internal invariant, a user error requiring handled return codes, or an implementation flaw causing cache misses and performance degradation.
 
-One reason for this is that having a bunch of separate functions (whether one-liners or not) that are called from within one orchestrator function requires the developer to jump around a dozen calls, or even deep into a chain, in order to understand what is happening. This makes debugging and optimizing a nightmare. Thus the decision behind extracting a function or inlining its behavior at the cost of larger functions is not a real science, it is more an art that requires wisdom and experience.
+**Decide:**
+We formulate a highly specific mechanical intervention to permanently eradicate the defect or improve the implementation. Depending on the high-level observation, we may decide to introduce a new combination of explicit assertions, mandate the creation of a new automated test to lock down expected behavior, or decide to continuously refactor and optimize a sequential block of code to restore locality of behavior and operational efficiency.
 
-### Error Handling
+**Act:**
+We apply the precise syntactical correction, continuous refactoring, or optimization. We then immediately re-execute the software, its validation suite, or its benchmarks. If the code operates flawlessly and meets performance criteria, inner resilience is restored; if it fails, our aggressive debugging constraints and testing tools will trigger an immediate fault, rapidly accelerating our return to the Observation phase.
 
-A paradigm that is prevailing in modern times (I am looking at you Go) is to return errors from most functions. This forces code that wants to be "resilient" to need to check for a whole bunch of errors, and in languages that support exception-like systems, also exceptions. This complicates designs needlessly for edge-cases that rarely happen, or at least should happen rarely.
+## Operation
 
-I opt for a different approach to truly resilient code, inspired by Eskil Steenberg's principle of failing hard and loud during development. What I do instead is classify errors into two groups, which decide how to handle potential errors.
-1: Programmer Errors / Invariant Violations
-2: User Errors (direct or indirect)
+With the core out of the way, we now dive into the operationalization of said core.
 
-For programmer errors or invariant violations, it is dumb to return an error-code. Programmers should know better than to break the invariant of the code they call/use, especially when they wrote it themselves. As such, for these I use my own written assertions that ensure invariants are correctly kept, if not, they CRASH hardly and loudly, while giving as much diagnostic information as possible. When this crash inevitably happens, I immediately fix it. Most of these asserts are not compiled in release mode, but some I might keep alive for really critical areas.
+### Black-Box Modules
 
-User errors on the other hand are both unexpected and expected at the same time. Unexpected because we cannot plan for them all and expected because they are guaranteed to happen. Such issues should return clear error codes so that client code can choose how to handle it. 
+To align ourselves with operationally closed systems, all our libraries and all our systems are black boxes. Clients will never need to know of the internals of said system and only communicate through shared linguistics (API). This also has the benefit of eradicating bugs where the client accidentally modifies internal state.
 
-### Typing
+On the library level this is done through defining a single public header file for the entire library, which contains all available functions and their documentation as well as all the types clients need to have access to. Internal types are void pointers or structural forwards (incomplete types) so that the client cannot know what is going on (opaque pattern).
 
-This section serves to give a short overview of information on handling types in languages where applicable.
+Internally, each of these API functions is implemented in various (sub-)systems which can communicate through shared data format understanding (internal headers) and publicly declared API.
 
-For example in C, standard code writes the pointer in the typedef, like:
-```c
-typedef void *Handle
+Dependency inversion can also be applied when it directly aids overall codebase resilience. For example, a core library might declare an abstract assert failure reporter interface that clients can set to i.e., a logger. This way, the core library does not depend on the logging library.
 
-void handle_do_something(Handle handle);
+### Dependency Management
+
+#### Insulation
+
+The architecture mandates a policy of zero unwrapped external dependencies. Relying upon uninsulated third-party code introduces unacceptable vulnerability to upstream volatility, API alterations, and technological obsolescence. Where third-party integration is unavoidable, it must be strictly encapsulated behind a custom interface wrapper owned and controlled entirely by the developer. This ensures that if the external dependency breaks its API contract, the required modifications are localized to a single translation unit rather than cascading throughout the entire codebase. 
+
+#### Dependability
+
+The structural integrity of all modules within the system is formally governed by the Dependable Dependencies Principle. This principle dictates that the more a specific unit of code is relied upon across the overarching architecture, the lower its probability of failure must inherently be. The enforcement of this principle is achieved by computationally evaluating a module's dependency rank alongside its cyclomatic complexity and assurance metrics. Foundational libraries must remain structurally flawless. This does require a tool which computes it.
+
+### Rewriting vs Refactoring
+
+A core dilemma in building resilient code is whether to rewrite something from scratch or to incrementally improve it. 
+Many developers assert that this is a binary choice, however, I think that is dumb. Both rewriting and refactoring incrementally have tremendous value.
+
+As noted earlier, we have different temporal contexts going on; the macro and the micro. On the macro level we can notice it is bad to interact with certain APIs, even if we wrote them ourselves, which can eventually warrant a full rewrite, sometimes sooner than later. However, on the micro level, we have full freedom to incrementally refactor to make code more debuggable, clear, or readable, in essence, more resilient; this is possible because the external API is stable.
+
+It is important to note when refactoring turns into "treating the symptom rather than the disease". When this happens, one is no longer aiding codebase resilience but detrimenting it, and in that case an API rewrite is warranted. Depending on the complexity and scope, sometimes a surgical API rewrite is enough, but at other times a complete library rewrite is necessary.
+
+> In order to truly master something, you must understand the why behind the how.
+
+Often when designing an initial API without domain experience, you don't know that *why* yet, so the initial API is bad. Later you realize the domain problems, bottlenecks, etc., and can implement a far better architecture from the start. Then rewriting gives significantly more gains in the long run.
+
+### Style
+
+As mentioned, we use Dependable C. 
+
+A core principle for resilient code is: **explicit is better than implicit**, even if it costs significantly more keystrokes. 
+> Typing is never the problem, debugging is.
+
+The central mandate for writing code that is resilient is the fact that **code is a communication platform for making intentions clear**; ambiguity is one of the greatest enemies of resilience.
+
+#### Locality of Behavior
+
+To preserve the locality of behavior, the default architectural stance is to utilize explicit, sequential, sometimes lengthy functions. Code must execute in a linear narrative from top to bottom. Deeply nested call stacks and orchestrator functions that merely manage other functions severely fragment the codebase, forcing the developer to navigate highly disjointed logic to comprehend a single operation. Extracting logic into smaller sub-routines is permitted as a pragmatic exception, solely when a lengthy procedure actively obscures the core narrative of the operation. 
+
+In essence, keep in mind the overall resilience (debuggability, clarity, readability).
+
+#### Naming
+Variables, types, and functions must be highly descriptive, leveraging wide and explicit naming conventions. The architecture mandates a rigid naming taxonomy for functions, adhering to the module, subject, and action format, accompanied by an optional suffix. This methodology inherently constructs a globally searchable directory structure within the source text itself. By typing the module prefix, the developer can instantly navigate the capabilities of the system without reliance on external Integrated Development Environment parsing tools. Symmetrical consistency in naming is required; operations must utilize standardized vocabulary to prevent semantic confusion. 
+
+#### Casing
+```
+- functions: 	snake_case
+- variables: 	snake_case
+- parameters: 	snake_case
+- structs: 		PascalCase
+- enum-members: SCREAMING_SNAKE_CASE
 ```
 
-To me this is bad programming because it hides the fact that it is a pointer in the typedef, making it implicit.
-Instead, I put the pointer on the usage.
+### Quality Assurance
 
-```c
-typedef void Handle
+Quality assurance bridges the gap between the programmer's mental model of the software and the actual physical execution of the software. The approach to validation is fundamentally empirical and aggressively crash-oriented.
 
-void handle_do_something(Handle *handle);
-```
+#### Error Handling
 
-### Naming
-In terms of naming, both Bob Martin and Eskil Steenberg agree that wide names are NOT an issue (ref:1,4).
+Programmer errors and invariant violations must trigger immediate, hard, and highly visible failures during the development phase. Gracefully swallowing errors, relying on default zero-initialization, or permitting a system to silently fail introduces subtle, time-traveling bugs that are exceptionally difficult to trace. Memory should be deliberately seeded with specific, recognizable byte patterns upon allocation to guarantee that unauthorized access to uninitialized state causes an immediate fault.
 
-The goal of an entity's name is to *describe* its essence. Its role is equivalent to `term` in natural language.
+Errors are strictly bifurcated into programmer errors and user errors. Programmer errors mandate explicit assertions that halt execution loud and fast. User errors, which are inevitable occurrences during runtime, must return clear, explicit error codes that force the client architecture to consciously handle the failure state. 
 
-#### Length
-In general, the length of an entity's name is a function of its scope and inherent complexity. A variable that is used only on one line can easily be just a single character (even though I generally avoid this); conversely, a constant that is accessed in a thousand places all over the repo should have a very meaningful name. `RecordOfFinancialInformationContentLengthLimit` would be far better than `ContentLengthLimit`, because we would not be able to infer the actual meaning from the latter. However, if we were working in a *scope* such as a struct describing the financial record configuration `FinancialInformationConfig`, we could name it `ContentLengthLimit` as a field, because the meaning is clearly inferable.
+#### Testing and Validation
 
-With functions, another axis is required, what it actually does. A specific function should have a specific name, whereas a broad function should have a broad name. `KillProgram` is a good specific name for a function that *only* kills the program. `Compute` can be an example of a proper broad name if the computation is actually determined by the configuration and arguments given to the function.
+Here again many programmers present a false choice: "either go for full test coverage or test only by usage".
+I think both approaches have merit.
 
-#### Style
+Not all code is created equal. Not all code has the same complexity, or risk.
 
-##### General Function Naming
+By computing the [DDP](#dependability) factor mentioned earlier, we can identify high-risk high-complexity targets that are bound to benefit from extensive testing. In general, the more complex a system or mechanic is, and the more other systems depend on it, the more important it is to have great validation. A one-off utility function does not need a big test dedicated to it.
 
-I tend to follow Eskil Steenberg's naming style for functions which means: `<system/module/component><subject><action><optional suffix>`.
-
-An example of this is: `LexerConfigurationSetPatternCompiler` where:
-- `Lexer` 			   refers to the system or module or component
-- `Configuration`	   refers to the subject
-- `SetPatternCompiler` is the action
-
-Another example could be: `LexerCreateFromBinary` where:
-- `Lexer` 	   refers to the system or module or component (in this case it is also the subject)
-- `Create`	   is the action
-- `FromBinary` is the optional suffix
-
-As you can see, the optional suffix allows modification of the action to be made more specific.
-
-The reason we do naming in this way is to make it readable at a glance *where* a certain function is located and comes from. Additionally, by leveraging this standardized way of writing functions, autocomplete becomes very easy because you can traverse the prefix set as a folder tree. Type `Lexer` and (depending on editor) you see all functions related to the lexer, type `Configuration` after and it will filter down to everything to do with the configuration.
-
-One other thing that is useful to keep in mind is to be *consistent* with naming, as it makes grasping code at a glance far easier. For example, when using `get` and `set` in X places, don't use `retrieve` and `adjust` in Y other places, **unless it clearly means something semantically different**. In line with this, it is a bad idea to use asymmetric names like `retrieve` and `set`, because a `set` implies a `get` purely linguistically. 
-
-##### C Naming Style
-
-My naming style in C is not very different from what I said above. However, I formalize my casing and style here.
-
-Functions:			snake_case
-Variables:			snake_case
-Struct types:		PascalCase
-Enum types:			PascalCase
-Function typedefs:	PascalCase
-Macros:				SCREAMING_SNAKE_CASE
-
-##### Implicit Access made Explicit
--- such as in Go
-
-For unexported functions in a (sub)package, I adopt a convention since 03 June 2026 which indicates whether a function should be referenced outside a file.
-
-p_* indicates the function is private to the file and should not be called outside.
-i_* indicates the function is internal and can be used anywhere within the module. 
-
-### Commenting
-
-#### Regular Comments
-Inline comments represent a failure to express intent through the code itself. The code dictates the *what*; comments exist solely to explain an unavoidable *why*. When you feel the need to write a comment, your first reflex must be to refactor the code to make the comment unnecessary (e.g., extracting logic into well-named helper methods or renaming variables).
-
-When refactoring is impossible or insufficient, inline comments are strictly limited to the following use cases:
-
-- **Algorithmic Context:** Explanations for highly complex, mathematically dense, or counter-intuitive logic that cannot be simplified or made self-evident through code alone.
-- **Regression Warnings:** Critical warnings regarding non-obvious side effects, edge cases, or workarounds for third-party bugs (e.g., "Do not reorder this execution; function X relies on the mutated state of Y").
-- **Structural Separators:** High-level section dividers within a file (e.g., separating Types, Interfaces, and Implementations).
-
-#### Code Documentation
-Code documentation exists to explain the *why* and *how* of an entity, as the code itself already dictates the *what*. Documentation must be written for every public-facing entity (types, functions, classes, etc.). It is equally critical for internal entities where business logic, state mutation, or non-obvious constraints exist. You only skip documentation if the code is genuinely self-explanatory. See also: [API Design](#api-design).
-
-Depending on the scope and complexity of the entity, your documentation must define its operational contract. Include the following elements when applicable:
-
-- **The "Why" (Context):** The underlying business logic, historical context, or external system constraints that dictated this specific implementation.
-- **Examples of Usage:** Brief, copy-pasteable snippets demonstrating the entity in a standard scenario. Show, do not just tell.
-- **Parameters & Return Values:** Explicit definitions of input ranges, null/undefined handling, and the exact state of the return value.
-- **Exceptions & Errors:** Every specific error thrown or returned, and the precise conditions that trigger them.
-- **Side Effects:** Explicit declarations of mutated global state, altered inputs, database writes, or external API calls. State explicitly if the function is pure.
-- **Thread Safety & Concurrency:** Whether the entity is safe for simultaneous multi-thread access or modification.
-- **Invariants:** Conditions that must remain true before and after the execution of the entity.
-- **Edge Cases:** Non-standard inputs or environmental states and exactly how they are handled.
-- **Known Bugs:** Unresolved issues or limitations tied to the current implementation.
-- **Complexity:** Time and space complexity (Big O notation).
-- **Algorithmic Approach:** A high-level summary of the algorithm used, if it is non-trivial.
-- **Deprecation Notices:** Timelines for removal and the exact alternative developers must use.
-- **ADR Links:** If applicable, one can link to a relevant entry in the ADR docs for more context behind a decision.
-
-There should be NO blank lines between sentences unless it is a paragraph break, otherwise it becomes unreadable.
-
-##### Go
-
-In Go, the `//` is used for standard comments and the `/* */` syntax is used for code-docs.
-
-I differentiate in this way because of my editor syntax highlighting setup.
-
-##### Example Documentation Format
-
-```typescript
-/**
- * Calculates the starting database offset for a given page number.
- *
- * [Context]
- * Used to translate user-facing page numbers (1-indexed) into database
- * offsets (0-indexed) for the internal pagination queries. This ensures
- * UI elements decouple from raw database cursor logic.
- *
- * [Complexity]
- * Time: O(1)
- * Space: O(1)
- *
- * [Side Effects]
- * Pure function. No side effects. Does not mutate inputs.
- *
- * @param pageNumber - The 1-indexed page requested by the client.
- * @param pageSize - The maximum number of items per page.
- * @returns The 0-indexed integer offset for the database query.
- *
- * @throws {ValidationError} If pageNumber is less than 1.
- * @throws {ValidationError} If pageSize is less than 1 or exceeds 100.
- *
- * @example
- * // Fetching the 3rd page with 10 items per page starts at index 20
- * const offset = parsePaginationOffset(3, 10); 
- */
-export function parsePaginationOffset(pageNumber: number, pageSize: number): number {
-    if (pageNumber < 1) {
-        throw new ValidationError("Page number must be >= 1");
-    }
-    
-    if (pageSize < 1 || pageSize > 100) {
-        throw new ValidationError("Page size must be between 1 and 100");
-    }
-
-    return (pageNumber - 1) * pageSize;
-}
-```
-
-### ADR
-
-Whenever I make a major architectural decision, I try to add an ADR (ref:5) entry to the `docs/adr` folder of that particular project. The reason for doing this despite being a solo developer is that it helps me to understand *why* I did things a certain way in the future if I ever need to debug something or optimize something. 
-
-In addition, it helps me to stay in line with that particular project's *Schwerpunkt* (a term used in WW2 by the Blitzkrieg offensive, roughly meaning "the most important thing"). In other words, it ensures I don't deviate from the design decisions and architectural constraints I committed to.
-
-Lastly, when I open source a repository and other people want to either contribute or understand my code, they can look at the ADR directory.
-
-#### ADR Example
-The following is the format I use for ADR records.
-```
-# <RECORD TITLE>
-
-STATUS: <proposed> | <accepted> | <rejected> | <superseded>
-
-SUPERSEDING: <optional link to the ADR record we supersede>
-SUPERSEDED:  <optional link to future ADR superseding this one>
-
-DECISION: <single line describing the decision>
-DATE: <date of decision>
-
-## RATIONALE
-<explaining the rationale behind the decision>
-
-## ALTERNATIVES CONSIDERED
-<optional block of alternative approaches considered with rationale for why reject them>
-
-## REFERENCES
-<optional block of references if any>
-```
-
-In the standard ADR (ref:5), rejection status does not exist. I included this such that I don't follow in the same design traps. 
-
-The ADR files follow the naming structure `<number>-<title>.md`, for example `0001-no-lexer-level-token-filtering.md`.
-
-### Usage of LLMs
-This section will likely be extended in the future.
-
-As of now, all I say is that I don't like using LLMs for anything I want to master myself or enjoy doing. As such, I rarely delegate backend / systems engineering work to LLMs, except for large scale refactors. I do delegate most of my frontend work to LLMs as I absolutely hate that.
-
-I also use LLMs for the following things:
-- Code Reviews in line with the Style Guide
-- Bug Hunting
-- Debugging
-- Writing Code Documentation
-- Sometimes writing READMEs
-- Brainstorming ideas
-- Writing my tests
-
-In the case of tests, I always pay significantly more attention to what the LLM does, since it has a tendency to write tests that just `assert true` for example, or to adjust the tests such that they pass, rather than the implementation.
- 
-### Testing and Benchmarking
-Because I care about performance a lot, most of my software components are heavily profiled and benchmarked using my own tool (SHIELD). Without going in too much depth, SHIELD is a comprehensive (WIP) tool designed to shield codebases from functional rot across horizons and dimensions. It handles profiling, benchmarking, testing, analysis, etc. While not doing everything by hand (i.e., it calls Valgrind/Cachegrind and other tools under the hood when applicable), it does provide a unified framework for handling these essential things.
-
-Before today (13 June 2026), I implemented a rigorous test-driven development cycle, first write a failing test, then get the test to work, and refactor. While this is generally a good approach and taught me a lot about implementing structurally proper code, I learned from reflecting on Eskil Steenberg's content that this is a bit of a waste of time. 
-
-Because programmer errors and invariant violations are already detected at runtime (often in debug mode) using [assertions](#error-handling), it makes no sense to write dedicated tests for these kinds of bugs and issues. Steenberg also denoted that you write a library because you intend to *use* it, and by using it you already validate that it works as expected. The case where a dedicated testing setup is justified from the get-go is when you write really complex code... What satisfies this complexity threshold is based on programmer intuition. 
-
-Of course, when I do encounter a behavioural bug or anything more sophisticated than a simple assertion or combination of assertions can prevent in the future, I do write a dedicated test for this, so that the bug in the future can never repeat itself.
+Because it is impossible to predict all future anomalies, the architecture demands a strict protocol for regression management. Whenever an unforeseen behavioral bug is encountered in the field, it must immediately be integrated into the validation infrastructure. This is achieved by either authoring a new, dedicated test to capture the exact failure state or by introducing a new combination of explicit assertions. This methodology ensures the specific defect is permanently eradicated from the solution stack and can never silently repeat itself. 
 
 ---
 
-## References
-My overall references for my programming principles come from Eskil Steenberg and Bob Martin, as well as Dale from the ArjanCodes community.
+## Definitions
+- **Resilience & being resilient:** To be able to recover from failure as quickly as possible.
+- **Systemic environment:** In the context of programming, I think a systemic environment is best described as a *layer*. For example, the *application layer*, which houses various subsystems to execute its logic (i.e., physics, audio, etc.)
 
-1. [Eskil Steenberg: "How I program C"](https://www.youtube.com/watch?v=443UNeGrFoM)
-2. [Eskil Steenberg: "Architecting LARGE Software Projects"](https://www.youtube.com/watch?v=sSpULGNHyoI)
-3. [Eskil Steenberg: "You should finish your software – BSC 2025"](https://www.youtube.com/watch?v=EGLoKbBn-VI)
-4. Bob Martin: Clean Code
-5. [Martin Fowler: "Architecture Decision Record"](https://martinfowler.com/bliki/ArchitectureDecisionRecord.html)
+## Mentors
+The biggest inspirations and mentors for my programming philosophy, in no particular order are:
+- Eskil Steenberg
+- Robert C. Martin
+- Dale Hagglund
+
+## References
+This is an incomplete list of references that guided this document. For more detail, see the [preamble](#preamble)
+
+1. [resilience definition - wordnik](https://wordnik.com/words/resilience)
+2. [being resilient definition - wordnik](https://wordnik.com/words/resilient)
+3. Richards, C. (2004). Certain to Win: The Strategy of John Boyd, Applied to Business. Xlibris, Corp.
+4. Carefree Wandering (Director). (2023a, September 25). Niklas Luhmann: A Super Theory of Society [Video recording]. https://www.youtube.com/watch?v=exPOPm8qQsY
+5. Carefree Wandering (Director). (2023b, October 12). Niklas Luhmann: Function, Code, and Ontology of the Media [Video recording]. https://www.youtube.com/watch?v=6Bw1PY0jUzg
+6. Carefree Wandering (Director). (2023c, November 1). Luhmann’s Media Theory: The Specifics [Video recording]. https://www.youtube.com/watch?v=9ZSOsaiQGD0
+7. Moeller, H.-G. (2012). The radical Luhmann. Columbia University Press.
+8. Steenberg, E. (n.d.). Dependable C. Retrieved June 13, 2026, from https://dependablec.org/
+
+---
+
+## Extra
+
+### Luhmannian Systems Theory
+I am by no means an expert on Luhmann's systems theory, but I have had e-mail discourse with a scholar (Hans-Georg Moeller) specializing in this subject in July 2024, who confirmed my understanding.
+
+I will not explain Luhmann's systems theory in detail as it is not vital to this document. However, I will briefly explain its concepts. For a more in-depth understanding, I recommend watching references: 4, 5, and 6 and/or reading reference 7.
+
+As a contextual note: Luhmann developed his systems theory in the context of sociology, where he viewed society as a "society of societies", in other words, a system of systems. As such, his framework for systems theory is *descriptive* in nature, because it describes society. However, I, at the time I conversed with Dr. Moeller, extrapolated his concepts of functionally differentiated systems theory into a prescriptive framework for the design of proper systems. This framework is what I draw on loosely here.
+
+The core idea of this theory, as its name implies is that each system is described in terms of its *function*. Luhmann asserted each system had a *unique binary operational code* which the system uses to evaluate its own mechanisms. For instance, the law system uses 'legal vs. illegal', the science system uses 'known vs. unknown'. 
+
+The moment a system starts using a different operational code to evaluate its mechanisms, systemic corruption occurs. Moeller explains this through analogy, if in sports paying money in a match affects the outcome, then this is using the wrong code (the economy system's code rather than the sport system's code, or the larger entertainment system as a whole).
+
+A system obviously does not exist in a vacuum, Luhmann noted how each system operates within an *environment* of other systems (its siblings so to speak). Within a system, any number of sub-systems can exist, which again form an environment. 
+
+According to Luhmann, a system is *operationally closed but structurally coupled*; what this means is that each system has its own set of rules, routines, code, etc., which forms a language only this system uniquely understands. The combination of these rules, routines, etc., is what Luhmann called a system's *program*. Because only the system itself understands its own *program*, no system directly *controls* any other system but instead *irritates* it.
+
+Through this *system-environment* relationship, there are interdependencies between systems in the same environment. For example, a media production (media system) influences the prices of an item (economy system) which in turn causes politicians to be upset at the price change (political system) which then requires the passing of a new law (legal system). 
+
+In Luhmann's view, a system's environment is always infinitely more complex than the system itself, which can be proven because to comprehend the environment fully, one must understand the language of the environment in its entirety, but because each system by definition has a parent system (for the parent system holds the environment), there is an infinite number of parents to understand. As such, the system has internal mechanisms (defined in the program), distincting which environmental signals are processed and in what ways, and which are discarded; this is how the infinite complexity problem is solved, and why it is necessary to have operational closure.
+
+However, the core idea remains the same, that one system cannot directly control other systems. Luhmann famously said "only education can educate", and the reason for this is that only the education system knows how to educate. 
+
+In this way, systems are also autopoietic and self-referential (they refer to themselves and produce themselves or their own operation), one education operation leads to the next education operation and so on; one legal decision leads to the next legal decision, and so on. Self-referential in the sense that systems steer themselves in different directions based on the input it receives from external feedback (environment) and internal feedback (their operations, routines, etc., as evaluated by their binary code).
+
+In other words, the system reproduces itself through its own internal communications (the execution of the program). One could even say that the *function* of a system is determined directly by the complex ways its internals communicate, which is to say, the program.
+
+
+---
 
 ## Changelog
 
 ### 13 June 2026
+- Complete rewrite (v1)
 - Rewrite section on testing
 
 ### 11 June 2026
