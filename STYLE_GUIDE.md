@@ -1,6 +1,6 @@
 # STYLE GUIDE
 
-Current version: 0.1.3
+Current version: 0.1.4
 
 ---
 
@@ -341,11 +341,13 @@ I also use LLMs for the following things:
 In the case of tests, I always pay significantly more attention to what the LLM does, since it has a tendency to write tests that just `assert true` for example, or to adjust the tests such that they pass, rather than the implementation.
  
 ### Testing and Benchmarking
-Because I care about performance a lot, most of my software components are heavily benchmarked using my own Anvil framework (currently not available publicly), and profiled using my Shield framework (also not available). Under the hood they use the standard pprof tool as well as valgrind.
+Because I care about performance a lot, most of my software components are heavily profiled and benchmarked using my own tool (SHIELD). Without going in too much depth, SHIELD is a comprehensive (WIP) tool designed to shield codebases from functional rot across horizons and dimensions. It handles profiling, benchmarking, testing, analysis, etc. While not doing everything by hand (i.e., it calls Valgrind/Cachegrind and other tools under the hood when applicable), it does provide a unified framework for handling these essential things.
 
-Whenever possible, I try to start out with writing my tests for the systems I want to create, which goes in conjunction with starting with the API (see: [API Design](#api-design)). My initial tests will fail, and only then do I start writing the code to make it pass. Once it is functional and I am done designing the overall functionality will I start benchmarking and profiling to ensure it behaves as performantly as I can make it.
+Before today (13 June 2026), I implemented a rigorous test-driven development cycle, first write a failing test, then get the test to work, and refactor. While this is generally a good approach and taught me a lot about implementing structurally proper code, I learned from reflecting on Eskil Steenberg's content that this is a bit of a waste of time. 
 
-Something that Dale once adviced me stood out to me, and that is to test *behaviour*, not *implementation*. In other words, the tests must use the exact same path as library consumers would, and thus not rely on intrinsic details of said library. You test the outcomes of a certain function, not *how* the function gets the outcome. 
+Because programmer errors and invariant violations are already detected at runtime (often in debug mode) using [assertions](#error-handling), it makes no sense to write dedicated tests for these kinds of bugs and issues. Steenberg also denoted that you write a library because you intend to *use* it, and by using it you already validate that it works as expected. The case where a dedicated testing setup is justified from the get-go is when you write really complex code... What satisfies this complexity threshold is based on programmer intuition. 
+
+Of course, when I do encounter a behavioural bug or anything more sophisticated than a simple assertion or combination of assertions can prevent in the future, I do write a dedicated test for this, so that the bug in the future can never repeat itself.
 
 ---
 
@@ -359,6 +361,9 @@ My overall references for my programming principles come from Eskil Steenberg an
 5. [Martin Fowler: "Architecture Decision Record"](https://martinfowler.com/bliki/ArchitectureDecisionRecord.html)
 
 ## Changelog
+
+### 13 June 2026
+- Rewrite section on testing
 
 ### 11 June 2026
 - Add section on error handling
