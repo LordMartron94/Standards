@@ -94,6 +94,10 @@ When integrated with the systemic principles outlined previously, the synthesis 
 - Luhmann's systems theory provides the *structural blueprint* for a resilient system, dictating operationally closed, black-box modules that effectively reduce environmental complexity.
 - Boyd's OODA loop provides the *temporal engine* to ensure the system constantly evolves, preventing the entropy that inevitably degrades closed systems that fail to interact with their external reality.
 
+The ultimate tactical goal of Boyd's OODA loop is to achieve a state of *Implicit Guidance and Control* (IG&C). When a system (or the developer acting upon it) achieves deep, shared orientation and intuitive mastery over its domain, it can bypass the explicit "Decide" step entirely. Action flows seamlessly and instantaneously directly from Orientation. 
+
+In the context of our architecture, IG&C perfectly mirrors Luhmann's concept of autopoiesis. A highly cohesive, well-oriented software module reacts to environmental friction seamlessly through its own internal routines, without requiring heavy, top-down orchestration or explicit manager functions. By designing modules that are deeply aligned with their operational realities and strictly bounded by clear linguistic APIs, we enable the software to approach this state of frictionless, implicit execution.
+
 Across various scales of architecture, distinct procedures apply to implement this iterative loop. Note that the boundaries between macro and micro levels are inherently permeable in practical design; it is the prerogative of the engineer to determine the precise operational context at any given moment.
 
 #### MACRO Intersystemic Resilience
