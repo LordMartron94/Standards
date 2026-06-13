@@ -127,7 +127,7 @@ Note that the demarcation becomes blurry here, as a micro-level implementation c
 We execute the software and actively seek out physical feedback. This involves looking for hard, loud failures during development, such as triggered assertions, runtime traps, or deliberate memory seeding patterns. Furthermore, we observe the system's operational characteristics by running automated test suites, executing profiling tools to monitor memory and execution paths, and benchmarking performance metrics.
 
 **Orient:**
-We process these signals—whether they are crash dumps, test failures, or profiling data—to reconcile our inherently flawed mental model of the software with its actual physical execution. We pinpoint the exact locus of a malfunction or bottleneck, determining whether the failure is a programmer error violating a strict internal invariant, a user error requiring handled return codes, or an implementation flaw causing cache misses and performance degradation.
+We process these signals; whether they are crash dumps, test failures, or profiling data; to reconcile our inherently flawed mental model of the software with its actual physical execution. We pinpoint the exact locus of a malfunction or bottleneck, determining whether the failure is a programmer error violating a strict internal invariant, a user error requiring handled return codes, or an implementation flaw causing cache misses and performance degradation.
 
 **Decide:**
 We formulate a highly specific mechanical intervention to permanently eradicate the defect or improve the implementation. Depending on the high-level observation, we may decide to introduce a new combination of explicit assertions, mandate the creation of a new automated test to lock down expected behavior, or decide to continuously refactor and optimize a sequential block of code to restore locality of behavior and operational efficiency.
@@ -144,6 +144,8 @@ With the core out of the way, we now dive into the operationalization of said co
 To align ourselves with operationally closed systems, all our libraries and all our systems are black boxes. Clients will never need to know of the internals of said system and only communicate through shared linguistics (API). This also has the benefit of eradicating bugs where the client accidentally modifies internal state.
 
 On the library level this is done through defining a single public header file for the entire library, which contains all available functions and their documentation as well as all the types clients need to have access to. Internal types are void pointers or structural forwards (incomplete types) so that the client cannot know what is going on (opaque pattern).
+
+This strict separation perfectly embodies the strategic dynamic between *Cheng* (the expected) and *Ch'i* (the unexpected), a concept Boyd heavily integrated from Sun Tzu. The flat, single-header API acts as the *Cheng*; it must be highly predictable, perfectly standardized, and absolutely familiar to the consuming codebase. Conversely, the concealed internal implementation acts as the *Ch'i*; an isolated domain where we are free to execute radical, highly optimized, and entirely unexpected mechanical algorithms without ever disrupting the external environment's expectations.
 
 Internally, each of these API functions is implemented in various (sub-)systems which can communicate through shared data format understanding (internal headers) and publicly declared API.
 
@@ -171,6 +173,10 @@ It is important to note when refactoring turns into "treating the symptom rather
 > In order to truly master something, you must understand the why behind the how.
 
 Often when designing an initial API without domain experience, you don't know that *why* yet, so the initial API is bad. Later you realize the domain problems, bottlenecks, etc., and can implement a far better architecture from the start. Then rewriting gives significantly more gains in the long run.
+
+The necessity of upfront API design in this process is validated by Luhmann's concept of *Uncertainty Absorption* and *Decision Premises*. Defining the communication protocols and data formats prior to implementation absorbs the ambiguity and doubt of the problem domain early on. Once established, this API becomes a "decision premise"; an unquestioned structural foundation that allows the subsequent implementation to execute without paralyzing re-evaluations of its core constraints.
+
+Furthermore, the preference for total architectural rewrites when faced with structural decay is grounded in Boyd's concept of *Destruction and Creation*. To survive a changing environment, one must continually shatter outdated mental models, breaking them down into their fundamental constituent parts, and then synthesize those isolated primitives into an entirely new, cohesive whole. Incremental refactoring is insufficient against fundamental structural misalignment; when the system's orientation no longer matches reality, the only resilient solution is to dismantle the existing logic and construct a new operational paradigm.
 
 ### Style
 
@@ -202,6 +208,8 @@ Variables, types, and functions must be highly descriptive, leveraging wide and 
 ### Quality Assurance
 
 Quality assurance bridges the gap between the programmer's mental model of the software and the actual physical execution of the software. The approach to validation is fundamentally empirical and aggressively crash-oriented.
+
+This empirical approach is theoretically grounded in Luhmann’s paradigm of *Second-Order Observation*; the act of observing how observers observe. In a highly complex system, we cannot simply observe the code as static text. We must construct distinct mechanisms (such as memory trackers, visual debuggers, and explicit assertions) that actively observe the physical execution of the system on our behalf. By relying on these custom observation tools, we acknowledge that direct, first-order observation is inherently flawed, and that true systemic debuggability requires engineering the very lenses through which the software's failures will be viewed.
 
 #### Error Handling
 
