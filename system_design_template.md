@@ -3,7 +3,12 @@
 In this template I will provide a practical blueprint for designing systems and thinking through them before engaging with the development of the API and implementing it.
 
 It makes use of Luhmann's functionally differentiated systems theory as described in the [Style Guide](./STYLE_GUIDE.md)
+Be aware that filling this in properly and thinking about it is a skill on its own, which you will get better at over time.
+It helps to understand Luhmann's systems theory on a decent level, but you don't need to be an expert at it.
 
+I can guarantee that mastering this skill of systems design brings incredible and exponential improvements to both architecting your projects and ensuring the internal implementations are highly *resilient* as well. The latter is because internal implementations of complex systems are orchestrated by multiple *sub-systems*, which can utilize the same template; of course, this is not always necessary to do explicitly if a (sub-system) is sufficiently simple. 
+
+## Template Block
 Copy the block here into your document and then start filling it in:
 
 ```md
