@@ -8,6 +8,10 @@ It helps to understand Luhmann's systems theory on a decent level, but you don't
 
 I can guarantee that mastering this skill of systems design brings incredible and exponential improvements to both architecting your projects and ensuring the internal implementations are highly *resilient* as well. The latter is because internal implementations of complex systems are orchestrated by multiple *sub-systems*, which can utilize the same template; of course, this is not always necessary to do explicitly if a (sub-system) is sufficiently simple. 
 
+One of the primary benefits of using this template upfront, even before diving into the API, is that you get a far better idea of the *scope* of a library or system. Utilizing Luhmann's framework demands you can *differentiate* between systems, which means you must be able to define both what something *is* and what it *is not*; which is very important when building complex systems that should last forever.
+
+Not being able to determine scope is what results in bloated and messy APIs as well as overall just spaghetti codebases.
+
 ## Template Block
 Copy the block here into your document and then start filling it in:
 
