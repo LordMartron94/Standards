@@ -77,7 +77,7 @@ CheckOptions:
   - key: readability-identifier-naming.TypedefCase
     value: CamelCase
   - key: readability-identifier-naming.TypedefIgnoredRegexp
-    value: "(uint8|uint16|uint32|uint64|int8|int16|int32|int64|f_real|boolean|real32|real64|byte|timestamp)$"
+    value: "(uint8|uint16|uint32|uint64|uint_large|int8|int16|int32|int64|int_large|f_real|boolean|real32|real64|byte|timestamp)$"
 
   - key: readability-identifier-naming.MacroDefinitionCase
     value: UPPER_CASE
