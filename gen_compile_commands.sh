@@ -89,7 +89,7 @@ jq '
   def resolved_obj($tgt; $argv; $src):
     ($argv[2] | tostring) as $raw
     | if has_template($raw) then
-        ((param_text($tgt; "OBJ_DIR") // "build/obj")
+        ((param_text($tgt; "OBJ_DIR") // "build/linux/x86_64/obj")
          + "/"
          + ((param_text($tgt; "OUT_NAME") // "") + "_obj")
          + "/"
@@ -100,7 +100,7 @@ jq '
   def resolved_dep($tgt; $argv; $src):
     ($argv[3] | tostring) as $raw
     | if has_template($raw) then
-        ((param_text($tgt; "OBJ_DIR") // "build/obj")
+        ((param_text($tgt; "OBJ_DIR") // "build/linux/x86_64/obj")
          + "/"
          + ((param_text($tgt; "OUT_NAME") // "") + "_obj")
          + "/"
