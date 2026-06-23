@@ -45,7 +45,10 @@ FormatStyle: "llvm"
 
 CheckOptions:
   - key: readability-identifier-length.IgnoredVariableNames
-    value: "i|j|k"
+    value: "i|j|k|m2"
+
+  - key: readability-identifier-length.IgnoredParameterNames
+    value: "i|j|k|m2"
 
   - key: readability-identifier-naming.FunctionCase
     value: lower_case
