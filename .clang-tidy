@@ -85,4 +85,4 @@ CheckOptions:
   - key: readability-identifier-naming.MacroDefinitionCase
     value: UPPER_CASE
   - key: readability-identifier-naming.MacroDefinitionIgnoredRegexp
-    value: "(malloc|realloc|calloc|free|echo_message_[a-z0-9_]+|exit)$"
+    value: "(malloc|realloc|calloc|free|exit|echo_[a-z0-9_]+|shield_[a-z0-9_]+)$"
