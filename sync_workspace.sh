@@ -45,15 +45,15 @@ if ! git ls-files --error-unmatch "${target_path}" &>/dev/null; then
             git fetch gh 2>/dev/null || true
 
             # Handle the 'public' branch checkout
-            if ! git show-ref --verify --quiet refs/heads/public; then
-                echo "  🌿 Creating and checking out 'public' branch..."
-                git checkout -B public
-                # Attempt to link to the remote if it exists, otherwise it will link on first push
-                git branch --set-upstream-to=gh/public public 2>/dev/null || true
-            else
-                echo "  ✔ 'public' branch exists. Checking it out..."
-                git checkout public >/dev/null 2>&1
-            fi
+            # if ! git show-ref --verify --quiet refs/heads/public; then
+            #     echo "  🌿 Creating and checking out 'public' branch..."
+            #     git checkout -B public
+            #     # Attempt to link to the remote if it exists, otherwise it will link on first push
+            #     git branch --set-upstream-to=gh/public public 2>/dev/null || true
+            # else
+            #     echo "  ✔ 'public' branch exists. Checking it out..."
+            #     git checkout public >/dev/null 2>&1
+            # fi
         )
     fi
 
