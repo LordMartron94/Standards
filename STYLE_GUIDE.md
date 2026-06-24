@@ -1,6 +1,6 @@
 # Mr. Hoorn's Programming Philosophy & Style Guide
 
-Current version: 1.0.0
+Current version: 1.0.1
 
 ---
 
@@ -151,6 +151,8 @@ Internally, each of these API functions is implemented in various (sub-)systems 
 
 Dependency inversion can also be applied when it directly aids overall codebase resilience. For example, a core library might declare an abstract assert failure reporter interface that clients can set to i.e., a logger. This way, the core library does not depend on the logging library.
 
+A template for designing systems using Luhmann's theory can be found in the [System Design Template](./system_design_template.md).
+
 ### Dependency Management
 
 #### Insulation
@@ -195,6 +197,25 @@ In essence, keep in mind the overall resilience (debuggability, clarity, readabi
 
 #### Naming
 Variables, types, and functions must be highly descriptive, leveraging wide and explicit naming conventions. The architecture mandates a rigid naming taxonomy for functions, adhering to the module, subject, and action format, accompanied by an optional suffix. This methodology inherently constructs a globally searchable directory structure within the source text itself. By typing the module prefix, the developer can instantly navigate the capabilities of the system without reliance on external Integrated Development Environment parsing tools. Symmetrical consistency in naming is required; operations must utilize standardized vocabulary to prevent semantic confusion. 
+
+**Functions:**
+Functions in headers use the following scheme:
+- `<library/module>_<system>_*`
+- example: `nexus_paths_is_directory`
+Where *nexus* is the library/module and *paths* is the system.
+
+The equivalent source file is ALWAYS located as:
+- `src/<library/module prefix>_<system>.c`
+- example: `src/n_paths.c`
+
+Internally shared (static) variables or functions are prefixed with the system prefix as well (rather than the full library name). For example `n_path_resolve`.
+
+**Types:**
+Exposed types are prefixed as well, usually with the library prefix, but sometimes written in full.
+For example Nexus uses the full style: `NexusPath` whereas Loom uses the prefixed: `LLibrary`.
+
+**Enums:**
+Enum names follow the same rule as types, but the members use a style which is prefixed with the enum name abbreviation. For example: `NTP_MICRO_SECOND` which is part of the enum `NexusTimePrecision`.
 
 #### Casing
 ```
@@ -285,6 +306,10 @@ In other words, the system reproduces itself through its own internal communicat
 ---
 
 ## Changelog
+
+### 24 June 2026
+- Add paragraph about function and enum member naming.
+- Added reference to the new Luhmannian system design template.
 
 ### 13 June 2026
 - Complete rewrite (v1)
