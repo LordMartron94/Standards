@@ -32,6 +32,7 @@ Checks: >
   -readability-named-parameter,
   -readability-uppercase-literal-suffix,
   -readability-function-cognitive-complexity,
+  -readability-function-size,
 
   -modernize-*,
   -cppcoreguidelines-*,
