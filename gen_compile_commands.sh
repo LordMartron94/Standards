@@ -3,6 +3,10 @@ set -eu
 
 DEBUG=0
 
+if [ "${COMPILATION_GENERATOR_DEBUG:-false}" = "true" ]; then
+    DEBUG=1
+fi
+
 diagnostic() {
     if [ "$DEBUG" -eq 1 ]; then
         echo "$@" >&2
