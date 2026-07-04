@@ -18,3 +18,5 @@ Here are some alternative routes that comply with the style guide:
 
 Do you pick one of the alternatives or do you want to continue violating the style guide?
 ```
+
+Don't default to create helper functions. Always inline logic as per the style guide.
