@@ -86,4 +86,4 @@ CheckOptions:
   - key: readability-identifier-naming.MacroDefinitionCase
     value: UPPER_CASE
   - key: readability-identifier-naming.MacroDefinitionIgnoredRegexp
-    value: "(malloc|realloc|calloc|nexus_memory_bytes_set|nexus_memory_bytes_copy|nexus_memory_bytes_clear|free|exit|echo_[a-z0-9_]+|shield_[a-z0-9_]+)$"
+    value: "(malloc|realloc|calloc|nexus_memory_bytes_set|nexus_memory_bytes_copy|nexus_memory_bytes_clear|nexus_memory_bytes_clear_span|free|exit|echo_[a-z0-9_]+|shield_[a-z0-9_]+)$"
