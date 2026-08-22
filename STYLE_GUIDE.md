@@ -1,6 +1,6 @@
 # Mr. Hoorn's Programming Philosophy & Style Guide
 
-Current version: 1.0.1
+Current version: 1.0.2
 
 ---
 
@@ -40,6 +40,7 @@ When there is a specific source to thank for something I list it in the referenc
 		- [Locality of Behavior](#locality-of-behavior)
 		- [Naming](#naming)
 		- [Casing](#casing)
+		- [Includes](#includes)
 	- [Quality Assurance](#quality-assurance)
 		- [Error Handling](#error-handling)
 		- [Testing and Validation](#testing-and-validation)
@@ -226,6 +227,23 @@ Enum names follow the same rule as types, but the members use a style which is p
 - enum-members: SCREAMING_SNAKE_CASE
 ```
 
+### Includes
+To me it makes most sense to order includes in a layered way. Thus, even though it can hide include bugs, I prefer to order includes from lowest to highest layer. 
+
+As an example:
+```
+<nexus.h> (my absolute foundation)
+<echo.h> (logging)
+
+<blaze.h> (numerical computing)
+<engram.h> (AI library)
+
+<aegis.h> (telemetry / reporting)
+
+"../shaibel.h" (current library public header)
+"./s_internal.h" (current library internal header) 
+``` 
+
 ### Quality Assurance
 
 Quality assurance bridges the gap between the programmer's mental model of the software and the actual physical execution of the software. The approach to validation is fundamentally empirical and aggressively crash-oriented.
@@ -306,6 +324,9 @@ In other words, the system reproduces itself through its own internal communicat
 ---
 
 ## Changelog
+
+### 22 August 2026
+- Add section on includes.
 
 ### 24 June 2026
 - Add paragraph about function and enum member naming.
