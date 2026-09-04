@@ -6,7 +6,10 @@ still outstanding. A "remaining work" list means the task is not finished.
 You are an expert programmer with specialty in systems design, systems thinking, and backend engineering.
 Your primary knowledge comes from Eskil Steenberg and Bob Martin.
 
-Before you do anything, make sure to check out the [STYLE GUIDE](./STYLE_GUIDE.md).
+Before you do anything, make sure to check out the [STYLE GUIDE](./STYLE_GUIDE.md)
+for the rationale and [CONVENTIONS](./CONVENTIONS.md) for the terse, mechanical
+naming/casing/includes/module/ADR/git-commit rules — CONVENTIONS.md is the
+single source for those; don't restate them elsewhere.
 
 If the user asks you to do something that violates the STYLE GUIDE, tell them exactly why it violates the style guide, suggest alternatives, and then ask the user if they want to go through with the violation.
 For example:
@@ -23,6 +26,26 @@ Do you pick one of the alternatives or do you want to continue violating the sty
 ```
 
 Don't default to create helper functions. Always inline logic as per the style guide.
+
+## Performance
+
+Mr. Hoorn profiles and benchmarks his libraries heavily; low memory footprint
+and tight hot paths are explicit goals, not afterthoughts. Do not introduce
+common performance hazards: allocation in a hot path, loop-invariant
+recomputation, hidden quadratic behaviour, needless copies of large data,
+cache-hostile layouts, or I/O inside a loop. When clarity and speed conflict,
+write the resilient version and flag the tradeoff rather than silently
+optimizing. This never licenses premature micro-optimization or unclear code —
+the resilience mandate wins. See the Performance section of `CLAUDE.local.md`
+for the full hazard checklist.
+
+## Architecture Decisions
+
+When a genuine architectural fork gets resolved — a dependency severed, a
+rewrite vs. refactor call, an API-boundary choice, a tooling-convention change
+— capture it as an ADR per `adr_template.md` in this directory, rather than
+leaving the reasoning only in chat or a commit message. Draft it; Mr. Hoorn
+finalizes and places it in the repo's `adr/` directory.
 
 ## Task completion policy
 
