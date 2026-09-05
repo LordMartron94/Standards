@@ -16,7 +16,10 @@ branch=$(git rev-parse --abbrev-ref HEAD)
 # `diff HEAD` is exactly the incoming change -- the same scope deep-review's
 # own uncommitted-changes detection would use.
 diff=$(git -C "$repo_root" diff HEAD -- '*.c' '*.h')
-[ -n "$diff" ] || exit 0
+if [ -z "$diff" ]; then
+  echo "deep-review gate: no C/H changes in this merge -- skipped." >&2
+  exit 0
+fi
 
 . "$(dirname "$0")/lib/deep-review-gate.sh"
 run_deep_review_gate "$repo_root" "$diff" "pre-merge-commit into master"

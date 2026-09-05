@@ -20,8 +20,10 @@ zero_sha=0000000000000000000000000000000000000000
 . "$(dirname "$0")/lib/push-public-branch.sh"
 
 blocked=0
+matched_master=0
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$remote_ref" = "refs/heads/master" ] || continue
+  matched_master=1
   [ "$local_sha" = "$zero_sha" ] && continue # deleting the remote branch
 
   base="$remote_sha"
@@ -33,9 +35,13 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       blocked=1
       continue
     fi
+  else
+    echo "deep-review gate: no C/H changes in this push -- skipped." >&2
   fi
 
   push_public_branch "$repo_root"
 done
+
+[ "$matched_master" -eq 1 ] || echo "deep-review gate: this push doesn't touch refs/heads/master -- not applicable." >&2
 
 exit "$blocked"

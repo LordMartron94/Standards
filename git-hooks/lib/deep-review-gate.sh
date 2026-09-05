@@ -2,8 +2,12 @@
 # executed: defines run_deep_review_gate and returns.
 #
 # Contract: run_deep_review_gate <repo_root> <diff_text> <event_label>
-# Returns 0 to allow the merge/push, 1 to block it. Writes its narration to
-# stderr so it shows up in the normal `git merge`/`git push` output.
+# Returns 0 to allow the merge/push, 1 to block it. Prints a concise status
+# line to stderr for every outcome (so it always shows up in the normal
+# `git merge`/`git push` output, even when nothing needs to happen) but
+# never Claude's raw response -- that goes to a logfile
+# (<git-dir>/deep-review-gate.log, overwritten fresh on every run) so a
+# `git push` doesn't get flooded with report text.
 #
 # See adr/0001-deep-review-gate-on-master-merges.md for why this exists and
 # what it deliberately does not cover (--no-verify, standalone submodule
@@ -13,6 +17,11 @@ run_deep_review_gate() {
   repo_root="$1"
   diff_text="$2"
   event_label="$3"
+
+  git_dir=$(git -C "$repo_root" rev-parse --absolute-git-dir)
+  log_file="$git_dir/deep-review-gate.log"
+  : >"$log_file"
+  echo "deep-review gate log -- $event_label" >>"$log_file"
 
   # The deep-review skill (and STYLE_GUIDE.md/AGENT.md it reads) only exists
   # checked out inside a MergeSource workspace. A submodule cloned standalone
@@ -32,6 +41,8 @@ run_deep_review_gate() {
     echo "deep-review gate: 'claude' CLI not found on PATH -- blocking $event_label. Install Claude Code, or bypass this one merge/push with --no-verify if that's intended." >&2
     return 1
   fi
+
+  echo "deep-review gate: reviewing $event_label (this can take a bit)..." >&2
 
   diff_file=$(mktemp "${TMPDIR:-/tmp}/deep-review-gate.XXXXXX.diff")
   stderr_file=$(mktemp "${TMPDIR:-/tmp}/deep-review-gate.XXXXXX.stderr")
@@ -56,18 +67,28 @@ using the real Critical/High counts from your findings. PASS means zero Critical
     2>"$stderr_file") || claude_status=$?
   rm -f "$diff_file"
 
-  if [ "$claude_status" -ne 0 ]; then
-    echo "deep-review gate: claude invocation failed (exit $claude_status) -- blocking $event_label. stderr:" >&2
-    cat "$stderr_file" >&2
-    rm -f "$stderr_file"
-    return 1
-  fi
+  {
+    echo "--- claude exit status: $claude_status ---"
+    echo "--- stderr ---"
+    cat "$stderr_file"
+    echo "--- raw stdout (--output-format json) ---"
+    printf '%s\n' "$result_json"
+  } >>"$log_file"
   rm -f "$stderr_file"
 
+  if [ "$claude_status" -ne 0 ]; then
+    echo "deep-review gate: claude invocation failed (exit $claude_status) -- blocking $event_label. Details: $log_file" >&2
+    return 1
+  fi
+
   result_text=$(printf '%s' "$result_json" | jq -r '.result // empty' 2>/dev/null) || result_text=""
+  {
+    echo "--- parsed .result ---"
+    printf '%s\n' "$result_text"
+  } >>"$log_file"
+
   if [ -z "$result_text" ]; then
-    echo "deep-review gate: could not parse claude's JSON output -- blocking $event_label. Raw output (tail):" >&2
-    printf '%s\n' "$result_json" | tail -40 >&2
+    echo "deep-review gate: could not parse claude's JSON output -- blocking $event_label. Details: $log_file" >&2
     return 1
   fi
 
@@ -80,13 +101,13 @@ using the real Critical/High counts from your findings. PASS means zero Critical
       ;;
     "DEEP_REVIEW_GATE: BLOCK"*)
       echo "deep-review gate: BLOCKED -- $verdict" >&2
-      printf '%s\n' "$result_text" | grep -i 'results/reviews/' | tail -3 >&2
-      echo "deep-review gate: fix the findings above, then retry. Bypass with --no-verify if you must merge/push anyway." >&2
+      report_line=$(printf '%s\n' "$result_text" | grep -i 'results/reviews/' | tail -3)
+      [ -n "$report_line" ] && printf '%s\n' "$report_line" >&2
+      echo "deep-review gate: fix the findings above, then retry. Full response: $log_file. Bypass with --no-verify if you must merge/push anyway." >&2
       return 1
       ;;
     *)
-      echo "deep-review gate: no parseable verdict in claude's response -- blocking $event_label to be safe. Tail of response:" >&2
-      printf '%s\n' "$result_text" | tail -20 >&2
+      echo "deep-review gate: no parseable verdict in claude's response -- blocking $event_label to be safe. Details: $log_file" >&2
       return 1
       ;;
   esac
