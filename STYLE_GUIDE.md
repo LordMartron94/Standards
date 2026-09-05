@@ -196,6 +196,14 @@ To preserve the locality of behavior, the default architectural stance is to uti
 
 In essence, keep in mind the overall resilience (debuggability, clarity, readability).
 
+#### Inlining
+
+Performance is not an afterthought bolted on once a design is "done" -- it is one of the physical feedback signals MICRO Inner Resilience watches for, on par with a triggered assertion or a failed test. A translation unit that calls out to a separate function for what is, at the machine-code level, a handful of shifts and masks -- a bit test, a byte-order swap, a rotate, extracting one field from a packed word -- pays real call overhead (stack setup, a jump, a return) for work that costs less than the call itself, and the optimizer cannot always undo that once the definition lives in a different translation unit than its caller.
+
+The resolution is not to abandon Dependable C's discipline of one public header per library (Black-Box Modules) in favor of scattering logic across headers for speed. It is narrower: a function whose entire body is genuinely trivial and cheap -- no loop bound by caller-supplied data, no allocation, no syscall, nothing beyond a fixed, small number of operations -- is defined `static`, directly in the library's public header, instead of declared there and defined in a source file. Every translation unit that includes the header gets its own copy, and the optimizer can fold, inline, or eliminate it entirely at the call site, exactly as if the caller had written the shifts and masks by hand -- without the caller actually having to.
+
+This is not premature micro-optimization license. A function earns this treatment because its cost profile makes the call overhead disproportionate to the work, not because a wrapper is close by, and it never justifies giving up the resilience mandate for unclear code. When a candidate's body is not obviously trivial -- it loops over caller-supplied length, allocates, or performs a syscall -- it belongs in a source file like everything else, where its real cost dwarfs one function call.
+
 #### Naming
 Variables, types, and functions must be highly descriptive, leveraging wide and explicit naming conventions. The architecture mandates a rigid naming taxonomy for functions, adhering to the module, subject, and action format, accompanied by an optional suffix. This methodology inherently constructs a globally searchable directory structure within the source text itself. By typing the module prefix, the developer can instantly navigate the capabilities of the system without reliance on external Integrated Development Environment parsing tools. Symmetrical consistency in naming is required; operations must utilize standardized vocabulary to prevent semantic confusion. 
 
@@ -324,6 +332,9 @@ In other words, the system reproduces itself through its own internal communicat
 ---
 
 ## Changelog
+
+### 05 September 2026
+- Add Inlining subsection under Style: trivial, cheap functions are defined static, directly in the public header, instead of a source file.
 
 ### 22 August 2026
 - Add section on includes.

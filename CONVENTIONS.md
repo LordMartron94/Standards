@@ -74,6 +74,23 @@ genuinely obscures its core narrative — don't default to helpers.
 
 STYLE_GUIDE.md § Locality of Behavior
 
+## Inlining
+
+A function whose entire body is trivial and cheap — a fixed, small number of
+shifts/masks/comparisons, no loop bound by caller-supplied data, no
+allocation, no syscall — is defined `static`, directly in the library's
+public header, not declared there and defined in a source file. Everything
+else (a loop over caller-supplied length, an allocation, a syscall) still
+belongs in a source file.
+
+Mark each such header-defined function so an including translation unit that
+never calls it doesn't warn under `-Wall`'s `-Wunused-function` — see
+`NEXUS_MAYBE_UNUSED` in `libs/nexus/nexus.h` for the pattern (a library
+without a `NexusFoo`-shaped macro name already reserved defines its own
+equivalent the same way).
+
+STYLE_GUIDE.md § Inlining
+
 ## Modules
 
 One public header per library; internal types opaque (void pointers /
