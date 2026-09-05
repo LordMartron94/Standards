@@ -107,6 +107,134 @@ zero-init. Fresh allocations seeded with a recognizable byte pattern.
 
 STYLE_GUIDE.md § Error Handling
 
+## Documentation
+
+Terse rules only; rationale in STYLE_GUIDE.md § Documentation. Fork record:
+[`adr/0001-prose-first-labeled-doc-comments`](./adr/0001-prose-first-labeled-doc-comments.md).
+
+### Form
+
+- One block comment (`/* ... */`, C89) directly above the symbol it
+  documents — no blank line between the block and the declaration.
+- `/*` alone on the opening line, `*/` alone on the closing line. No leading
+  `*` on interior lines. Labels and prose flush-left; continuation lines
+  within a slot indented two spaces.
+- Hand-wrapped prose is authoritative — `.clang-format` has
+  `ReflowComments: false` so the formatter never re-flows a block
+  (adr/0001). Match the file's own wrap width (Nexus wraps ~76); keep every
+  line well under 100 regardless.
+- **Banned:** `//`; `/**` and `/*!`; every `@tag` / `\tag` (`@param`,
+  `@return`, `@brief`, `@note`, `@see`, `@pre`, `@post`, `@warning`, ...);
+  commented-out code; author / date / change-history lines (git owns that).
+
+### Slots — closed vocabulary, fixed order
+
+A slot is a line beginning `Label: `. Its body runs to the next slot line or
+`*/` (blank and indented lines belong to the current slot). Each slot at most
+once, in this order. Omit a slot only when its trigger is unmet.
+
+| Slot             | Present when                                                            |
+|------------------|------------------------------------------------------------------------|
+| `Summary:`       | always — one line; should name the symbol                               |
+| `Description:`   | behavior needs more than the summary line                               |
+| `Params:`        | the function / function-like macro takes parameters — one line each: `name  text` |
+| `Returns:`       | return type is non-`void` and not `NexusError`                          |
+| `Ownership:`     | any pointer or handle crosses the boundary (in or out)                  |
+| `Errors:`        | the symbol can fail — states the assert cases and the returned codes separately |
+| `Thread-safety:` | it touches shared / owned mutable state, installs a callback, or needs a quiescent period |
+| `Complexity:`    | DDP-foundational and it loops over caller data or allocates (optional otherwise) |
+| `See:`           | optional — cross-references                                             |
+| `Example:`       | optional — only when call sequencing is non-obvious                     |
+
+Types use `Summary:` / `Description:` / `Ownership:` / `Thread-safety:` /
+`See:`, plus one of:
+
+| Slot       | For                                                                  |
+|------------|--------------------------------------------------------------------|
+| `Fields:`  | a transparent struct whose fields need more than a short trailing `/* */` |
+| `Values:`  | an enum whose members need more than a short trailing `/* */`         |
+
+Short struct fields / enum members: trailing `/* */` on the member line, no
+slot.
+
+### Depth — proportional to DDP rank × complexity (as § Testing)
+
+- foundational or complex public symbol → every triggered slot, full `Description:`
+- ordinary public symbol → `Summary:` + triggered `Params:` / `Returns:` /
+  `Ownership:` / `Errors:`
+- internal (`static`) symbol, not obvious from name + signature → `Summary:` line only
+- internal symbol obvious from name + signature → no block
+- header-inlined trivial `static` (§ Inlining) → `Summary:` line only
+
+### `Errors:` slot ↔ assertions
+
+Every "... is a programmer error" clause in an `Errors:` slot has a matching
+`NEXUS_PRECONDITION` / `NEXUS_POSTCONDITION` in the implementation, and every
+such assertion is named in the `Errors:` slot. Two encodings of one contract;
+they must agree.
+
+### Implementation (`.c`) files
+
+- No doc block above a definition whose contract is already in the public
+  header (one contract, one place).
+- A file-local `static` gets a `Summary:` line only if its purpose is not
+  obvious from name + signature.
+- Inline `/* */` comments explain *why*, the non-obvious mechanism, or the
+  invariant held — never restate the header contract, never narrate what the
+  code plainly says.
+- Section banner between sections of any file that has more than one:
+
+  ```
+  /* ---------------------------------------------------------------------------- */
+  /* SECTION TITLE                                                                 */
+  /* ---------------------------------------------------------------------------- */
+  ```
+
+### Cross-reference forms (`See:` and inline)
+
+| Target          | Form                                              |
+|-----------------|-------------------------------------------------|
+| ADR             | `adr/NNNN-slug` — the file's own repo's `adr/`    |
+| research report | `results/research/<report-stem>`                 |
+| sibling symbol  | bare identifier, e.g. `nexus_paths_normalize`     |
+| style guide     | `STYLE_GUIDE.md § <Heading>`                      |
+| design doc      | `DESIGN.md § <Heading>`                           |
+
+### Library header file block
+
+Top of `<lib>/<lib>.h`: `Summary:` (the library's essence / operational
+code), `Layer:` (its place in the include order), `See:` (`DESIGN.md`,
+load-bearing ADRs). Source files need no file block.
+
+### Worked example
+
+```c
+/*
+Summary: spawn a child process from a validated specification.
+Description:
+  Runs the spawn transaction: static validation, then a fork and an
+  async-signal-safe child path that execs or reports failure back over a
+  close-on-exec pipe. Commits fully or rolls back leaving nothing.
+Params:
+  specification  validated spec; borrowed, not retained
+  out_process    out; on success owns one running process, NULL on failure
+  out_streams    out; requested pipe endpoints, NULL if none were requested
+Ownership:
+  Caller owns *out_process and releases it with nexus_process_destroy.
+  Streams in *out_streams are owned by that process and freed by that destroy.
+Errors:
+  A NULL specification or out_process is a programmer error (asserts).
+  Returns a NEC_PROCESS reason on any spawn failure; on failure no child
+  runs and every descriptor Nexus opened is closed.
+Thread-safety: safe to call concurrently for distinct specifications.
+See: adr/0032-fork-exec-spawn-with-error-pipe
+*/
+NEXUS_ERRORS_NODISCARD extern NexusError nexus_process_spawn(const NexusProcessSpecification *specification, NexusProcess **out_process,
+                                                             NexusProcessStreams *out_streams);
+```
+
+STYLE_GUIDE.md § Documentation
+
 ## Testing
 
 Investment is proportional to Dependable Dependencies Principle rank ×
@@ -124,9 +252,11 @@ STYLE_GUIDE.md § Testing and Validation, § Dependability
 - **ADR convention** (full detail: `adr_template.md`) — each repo keeps its
   architectural decisions in `adr/NNNN-title-slug.md`, one shared ID sequence
   across the Full and Lite tiers, IDs never reused, cross-referenced by ID
-  **and** relative Markdown link. Full tier for real alternatives / API or
-  dependency impact; Lite (Y-statement) for small reversible calls. Both carry
-  an optional Framework Hook back to the resilience/OODA framework below.
+  **and** relative Markdown link — except a reference to an ADR in *another*
+  repo, which is ID + repo-qualified path and no link (see `adr_template.md`).
+  Full tier for real alternatives / API or dependency impact; Lite
+  (Y-statement) for small reversible calls. Both carry an optional Framework
+  Hook back to the resilience/OODA framework below.
 
 ## Git Commits
 

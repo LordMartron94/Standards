@@ -1,6 +1,6 @@
 # Mr. Hoorn's Programming Philosophy & Style Guide
 
-Current version: 1.0.2
+Current version: 1.0.3
 
 ---
 
@@ -41,6 +41,7 @@ When there is a specific source to thank for something I list it in the referenc
 		- [Naming](#naming)
 		- [Casing](#casing)
 		- [Includes](#includes)
+	- [Documentation](#documentation)
 	- [Quality Assurance](#quality-assurance)
 		- [Error Handling](#error-handling)
 		- [Testing and Validation](#testing-and-validation)
@@ -252,6 +253,20 @@ As an example:
 "./s_internal.h" (current library internal header) 
 ``` 
 
+### Documentation
+
+A library's public header is not code with some documentation bolted onto it; by design it is half documentation. The Black-Box Modules rule collapses every function, type, and contract a client may depend on into one header precisely so that reading that single file is the whole of what integration demands. When the prose in that file is vague, missing, or shaped differently around every function, the black box has a smeared window and the client is driven back into the source -- which is exactly the coupling the single-header rule exists to stop. Documentation quality is a resilience concern on the same footing as the code.
+
+The Cheng/Ch'i split that governs the API governs its documentation too. The interior may be described however the implementer finds clearest, but the header face has to be *familiar*: a reader who has understood one function's comment should find the ownership rule, or the failure behavior, of the next function in the same place, without reading a paragraph to locate it. That is why the format is a fixed set of labeled slots -- `Summary:`, `Params:`, `Ownership:`, `Errors:`, `Thread-safety:`, and the rest -- rather than free prose in a recommended order. The labels are ordinary English lead-ins, not markup; they read aloud as sentences. They are also stable anchors, which lets the header be parsed into structured reference documentation later by a generator we own, without that generator needing a C compiler's grasp of intent. Markup-tag families in the Doxygen mold were weighed and rejected: they restate the type information the signature already carries, they turn the description of a contract into a per-parameter checklist, and `@`-noise erodes the one thing the comment exists to be -- read. The mechanical rules are in `CONVENTIONS.md § Documentation`.
+
+Explicit-over-implicit binds hardest at the failure boundary. A reader must be able to tell, without opening the implementation, which misuses of a function halt the process and which return a code they are obliged to handle -- the bifurcation from Error Handling only helps if it is visible where the call is being written. The `Errors:` slot is mandatory for any function that can fail, and it states both halves: the conditions that are programmer errors and assert, and the `NexusError` values returned for the caller to route.
+
+That slot and the function's assertions are two encodings of one contract, and they are required to agree. Every "X is a programmer error" clause in an `Errors:` slot has a matching `NEXUS_PRECONDITION` or `NEXUS_POSTCONDITION` in the body; every precondition the body asserts is named in the `Errors:` slot. This is Second-Order Observation turned on the contract itself: the prose says what must hold, the assertion is the lens that watches it hold during execution, and a gap between the two means one of them is lying. Review checks the correspondence.
+
+Investment in documentation tracks Dependable Dependencies Principle rank times complexity, the same way test investment does (Testing and Validation). A foundational entry point that a dozen libraries lean on earns every applicable slot and a full description; a one-off internal `static` whose name and signature already tell the whole story earns nothing. Uniform documentation effort is the same error as uniform test coverage -- it overspends on the trivial and underspends on the load-bearing.
+
+The implementation file is not a second contract. Comments in a `.c` file explain why the code is shaped as it is, point at the non-obvious mechanism, and name the invariant a block is holding -- the narrative Locality of Behavior asks the code to carry. They do not restate the header's contract, because two copies of one contract drift apart, and then the reader cannot tell which to believe.
+
 ### Quality Assurance
 
 Quality assurance bridges the gap between the programmer's mental model of the software and the actual physical execution of the software. The approach to validation is fundamentally empirical and aggressively crash-oriented.
@@ -332,6 +347,9 @@ In other words, the system reproduces itself through its own internal communicat
 ---
 
 ## Changelog
+
+### 06 September 2026
+- Add Documentation section: the public header is half documentation; a fixed labeled-slot comment format (`Summary:`/`Params:`/`Ownership:`/`Errors:`/`Thread-safety:`/...), no Doxygen-style markup; the `Errors:` slot and the precondition assertions must agree; documentation investment scales with DDP rank. Mechanical rules in `CONVENTIONS.md § Documentation`.
 
 ### 05 September 2026
 - Add Inlining subsection under Style: trivial, cheap functions are defined static, directly in the public header, instead of a source file.

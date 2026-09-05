@@ -48,6 +48,14 @@ adr/
   mention elsewhere) always give **both** the ID and a relative Markdown link,
   so the reference reads standalone *and* is one click away:
   `Superseded by [0007-use-arena-allocator](./0007-use-arena-allocator.md)`.
+- **Cross-repo references** — when the target ADR lives in a *different*
+  repository (a submodule ADR citing a superproject decision, or vice versa),
+  give the ID and a repo-qualified path but **no** Markdown link: a
+  `../../../` link resolves only in a full checkout and breaks when either
+  repo is browsed standalone. Form: ``<repo> `adr/NNNN-title-slug` `` — e.g.
+  ``superproject `adr/0001-deep-review-gate-on-master-merges` ``. Name the
+  concrete tie (a shared hook, a consuming script) so the link's absence
+  doesn't lose the "why".
 - Optional but recommended once a repo has more than a handful: a short
   `adr/README.md` listing ID, title, and status, newest last.
 
