@@ -1,0 +1,31 @@
+#!/bin/sh
+# Safety net for fast-forward merges into master, which git never runs
+# ./pre-merge-commit for. Gates any push that moves refs/heads/master behind
+# the deep-review skill, reviewing exactly the commit range being pushed.
+#
+# Installed via `core.hooksPath` by tools/scripts/install-git-hooks.sh, into
+# MergeSource and every submodule that opts in. See
+# adr/0001-deep-review-gate-on-master-merges.md.
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+empty_tree=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+zero_sha=0000000000000000000000000000000000000000
+
+. "$(dirname "$0")/lib/deep-review-gate.sh"
+
+blocked=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$remote_ref" = "refs/heads/master" ] || continue
+  [ "$local_sha" = "$zero_sha" ] && continue # deleting the remote branch
+
+  base="$remote_sha"
+  [ "$base" = "$zero_sha" ] && base="$empty_tree" # first push creating master
+
+  diff=$(git -C "$repo_root" diff "$base..$local_sha" -- '*.c' '*.h')
+  [ -n "$diff" ] || continue
+
+  run_deep_review_gate "$repo_root" "$diff" "pre-push to master ($local_ref)" || blocked=1
+done
+
+exit "$blocked"

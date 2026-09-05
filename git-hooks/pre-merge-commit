@@ -1,0 +1,22 @@
+#!/bin/sh
+# Gates non-fast-forward merges into master behind the deep-review skill.
+# Fast-forward merges never invoke this hook -- see ./pre-push for that case.
+#
+# Installed via `core.hooksPath` by tools/scripts/install-git-hooks.sh, into
+# MergeSource and every submodule that opts in. See
+# adr/0001-deep-review-gate-on-master-merges.md.
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+[ "$branch" = "master" ] || exit 0
+
+# At this point the merge is staged into the index but not yet committed, so
+# `diff HEAD` is exactly the incoming change -- the same scope deep-review's
+# own uncommitted-changes detection would use.
+diff=$(git -C "$repo_root" diff HEAD -- '*.c' '*.h')
+[ -n "$diff" ] || exit 0
+
+. "$(dirname "$0")/lib/deep-review-gate.sh"
+run_deep_review_gate "$repo_root" "$diff" "pre-merge-commit into master"

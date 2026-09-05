@@ -28,6 +28,11 @@ if ! git ls-files --error-unmatch "${target_path}" &>/dev/null; then
             git submodule update --init "${target_path}"
         fi
     fi
+
+    # 1b. Keep the deep-review merge gate wired up for this submodule -- runs
+    # on every sync, not just on first add, so it self-heals if hooksPath was
+    # ever reset. See adr/0001-deep-review-gate-on-master-merges.md.
+    tools/scripts/install-git-hooks.sh "${target_path}"
     # 2. Public Branch & Remote Wiring
     if [[ -n "${github_name}" && "${github_name}" != "-" ]]; then
         public_url="git@github.com:LordMartron94/${github_name}.git"
