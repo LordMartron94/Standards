@@ -3,6 +3,8 @@
 Checks: >
   -*,
 
+  clang-diagnostic-*,
+
   bugprone-*,
   -bugprone-exception-escape,
   -bugprone-forwarding-reference-overload,
