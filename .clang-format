@@ -7,6 +7,11 @@ TabWidth: 2
 UseTab: Never
 ColumnLimit: 150
 
+# Hand-wrapped comment prose is authoritative: reflow would merge adjacent
+# lines of a labeled-slot doc block (CONVENTIONS.md § Documentation) into one
+# paragraph. See adr/0001-prose-first-labeled-doc-comments.md.
+ReflowComments: false
+
 BreakBeforeBraces: Attach
 
 AllowShortIfStatementsOnASingleLine: Never
