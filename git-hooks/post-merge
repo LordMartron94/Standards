@@ -1,0 +1,11 @@
+#!/bin/sh
+# Keeps a local `public` branch fast-forwarded to master automatically after
+# a merge (or `git pull`, fast-forward or not) lands on master. See
+# ./post-commit for the direct-commit case, and
+# ./lib/sync-public-branch.sh for the shared logic and its safety limits
+# (fast-forward only, never pushes).
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+. "$(dirname "$0")/lib/sync-public-branch.sh"
+sync_public_branch "$repo_root"
