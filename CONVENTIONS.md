@@ -137,7 +137,7 @@ once, in this order. Omit a slot only when its trigger is unmet.
 |------------------|------------------------------------------------------------------------|
 | `Summary:`       | always — one line; should name the symbol                               |
 | `Description:`   | behavior needs more than the summary line                               |
-| `Params:`        | the function / function-like macro takes parameters — one line each: `name  text` |
+| `Params:`        | a parameter carries a non-obvious fact — copied / borrowed / retained / nullable / out / must-not-alias. One line each, `name  text`; omit the slot when no parameter does (the signature already lists them). Not a per-parameter checklist |
 | `Returns:`       | return type is non-`void` and not `NexusError`                          |
 | `Ownership:`     | any pointer or handle crosses the boundary (in or out)                  |
 | `Errors:`        | the symbol can fail — states the assert cases and the returned codes separately |
