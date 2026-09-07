@@ -41,10 +41,11 @@ for the full hazard checklist.
 
 ## Architecture Decisions
 
-When a genuine architectural fork gets resolved — a dependency severed, a
-rewrite vs. refactor call, an API-boundary choice, a tooling-convention change
-— capture it as an ADR per `adr_template.md` in this directory, rather than
-leaving the reasoning only in chat or a commit message. Draft it; Mr. Hoorn
+When a decision clears the bar in `CONVENTIONS.md § Architecture Decision
+Records` — the surface × friction gate — capture it as an ADR per
+`adr_template.md` in this directory, rather than leaving the reasoning only in
+chat or a commit message. That section is the single source for the threshold,
+the never-write-one list, and the Full vs Lite split. Draft it; Mr. Hoorn
 finalizes and places it in the repo's `adr/` directory.
 
 ## Task completion policy

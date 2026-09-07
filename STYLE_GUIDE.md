@@ -36,6 +36,7 @@ When there is a specific source to thank for something I list it in the referenc
 		- [Insulation](#insulation)
 		- [Dependability](#dependability)
 	- [Rewriting vs. Refactoring](#rewriting-vs-refactoring)
+	- [Architecture Decision Records](#architecture-decision-records)
 	- [Style](#style)
 		- [Locality of Behavior](#locality-of-behavior)
 		- [Naming](#naming)
@@ -182,6 +183,28 @@ The necessity of upfront API design in this process is validated by Luhmann's co
 
 Furthermore, the preference for total architectural rewrites when faced with structural decay is grounded in Boyd's concept of *Destruction and Creation*. To survive a changing environment, one must continually shatter outdated mental models, breaking them down into their fundamental constituent parts, and then synthesize those isolated primitives into an entirely new, cohesive whole. Incremental refactoring is insufficient against fundamental structural misalignment; when the system's orientation no longer matches reality, the only resilient solution is to dismantle the existing logic and construct a new operational paradigm.
 
+### Architecture Decision Records
+
+An Architecture Decision Record is the written trace of a single *Decide* step from the OODA loop, captured before the *Act* so that neither a future collaborator nor future me has to reconstruct the reasoning from a commit message or a half-remembered conversation. In Luhmann's terms the accepted record becomes a *decision premise*: once written it absorbs the uncertainty of that moment permanently, and the work beneath it proceeds without re-litigating its own foundation. This is the same *Uncertainty Absorption* that justifies upfront API design (Rewriting vs Refactoring); the ADR extends it to every structural fork that upfront design did not already settle.
+
+The hazard on the other side is a log nobody reads. A record written for a decision that was never really in doubt spends the reader's attention without repaying it, and enough of them bury the records that matter. So the bar is deliberate, and it has two halves that must *both* hold.
+
+The first is **surface**: the decision touches the system's structure, a public interface, a dependency edge, a non-functional profile (throughput, footprint, resilience, portability), or it is cross-cutting -- one change rippling through many translation units or every caller. This is Nygard's *architecturally significant* set (^9): the decisions that shape the black-box boundaries and the load paths between them, not the code inside a single box.
+
+The second is **friction**, arc42's refinement (^10): the decision is also *hard* -- costly or slow to reverse, genuinely contested with a real alternative that lost, first-of-a-kind for this codebase, or a knowing deviation from this guide (the violation-and-alternatives flow in AGENT.md). A decision that clears the surface test but carries no friction -- the obvious choice, cheaply undone -- is orientation the code already expresses; it does not need its own document.
+
+Fail either half and there is no record. In particular: an implementation detail already fixed by an accepted ADR, `DESIGN.md`, or this guide; a routine application of an established pattern where no alternative was weighed; a purely local, cheaply reversible call -- the name of one symbol, the shape of one loop, the extraction of one private helper; and a decision already written up in a research report or design document, which is cross-linked rather than restated.
+
+A record's boundaries matter as much as its threshold. One coherent design decision is one ADR, however many sub-choices it settles on the way -- the memory tracker's interception mechanism, its lock seam, its guard sizing, and its diagnostic-cost model are one decision with four facets, not four decisions. Splitting each facet into its own file fragments the reasoning a future reader has to reassemble, and pads the sequence until the genuinely independent forks are lost among the elaborations of other forks. The same test applies inside a record: a *Considered Option* earns its place only if someone actually argued for it. An earlier draft of the chosen design, listed as the alternative it was refined away from, is not a fork -- it is the design's own history, and it belongs in the prose, not in a table that stages a contest that never happened.
+
+Two tiers share one numbered sequence. The **Full** record -- context, drivers, every option seriously weighed with its honest downside, consequences -- is for a decision with two or more alternatives worth comparing, or one that changes a public API, a dependency edge, or a non-functional profile. The **Lite** record, a single Y-statement, is for the rest: a real fork, but one-sided enough that a page would be ceremony. A record that lists only the upside of the chosen option is not a decision record -- the option that lost is the part a future reader cannot reconstruct alone.
+
+The record is drafted when the decision is made and is present in the branch before that branch merges to master. A decision that clears the bar and appears in a diff with no accompanying record is a review finding, on the same footing as a style violation; the merge gate (superproject `adr/0001-deep-review-gate-on-master-merges`) does not distinguish. A record written weeks later, after the code has shipped, has the shape of a decision premise but not the force of one -- the alternatives are already foreclosed and the write-up rationalizes rather than decides.
+
+An ADR earns its immutability at the same moment its subject earns permanence: when the change lands on master. From then on, a premise that must change gets a new record superseding the old one by ID and link, and the original stays intact -- because once other work has taken a premise as given, the history of what was believed and why is itself orientation. Before that point none of it holds. The subject is only privately implemented, on an unmerged branch; nothing depends on the premise yet; the ADR is still the author's own working state. Rewrite it in place, merge it with a sibling, split it, renumber it, delete it -- an ADR only has to preserve the reasoning behind a change that has actually persisted, and until master nothing has.
+
+The mechanical form -- the trigger and exclusion lists as a checklist, the tier boundary, numbering, cross-reference forms, and both template blocks -- is in `CONVENTIONS.md § Architecture Decision Records` and `adr_template.md`.
+
 ### Style
 
 As mentioned, we use Dependable C. 
@@ -313,6 +336,8 @@ This is an incomplete list of references that guided this document. For more det
 6. Carefree Wandering (Director). (2023c, November 1). Luhmann’s Media Theory: The Specifics [Video recording]. https://www.youtube.com/watch?v=9ZSOsaiQGD0
 7. Moeller, H.-G. (2012). The radical Luhmann. Columbia University Press.
 8. Steenberg, E. (n.d.). Dependable C. Retrieved June 13, 2026, from https://dependablec.org/
+9. Nygard, M. T. (2011, November 15). Documenting Architecture Decisions. https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions
+10. Starke, G., & Hruschka, P. (n.d.). Document only architecturally relevant decisions! (arc42 Tip 9-1). Retrieved September 6, 2026, from https://docs.arc42.org/tips/9-1/
 
 ---
 
@@ -348,8 +373,12 @@ In other words, the system reproduces itself through its own internal communicat
 
 ## Changelog
 
+### 07 September 2026
+- Architecture Decision Records: add the granularity rule (one coherent design is one ADR; a genuine sub-fork is a section, not a file; a Considered Option must be an alternative someone advocated, not an earlier draft of the chosen design) and scope ADR immutability to the `master` boundary — while a change is only privately implemented its ADR may be rewritten, merged, split, renumbered, or deleted in place rather than superseded by a new record. Both also land in `CONVENTIONS.md § Architecture Decision Records` and amend `adr/0002`.
+
 ### 06 September 2026
 - Add Documentation section: the public header is half documentation; a fixed labeled-slot comment format (`Summary:`/`Params:`/`Ownership:`/`Errors:`/`Thread-safety:`/...), no Doxygen-style markup; the `Errors:` slot and the precondition assertions must agree; documentation investment scales with DDP rank. Mechanical rules in `CONVENTIONS.md § Documentation`.
+- Add Architecture Decision Records section: an ADR is a persisted *Decide* step / decision premise; a decision earns one only when it clears both a surface test (structure, interface, dependency edge, non-functional profile, or cross-cutting) and a friction test (hard to reverse, real alternative lost, first-of-a-kind, style-guide deviation); explicit never-write-one list; Full vs Lite by alternatives-or-surface; drafted before merge, enforced by the deep-review gate. Mechanical rules in `CONVENTIONS.md § Architecture Decision Records`.
 
 ### 05 September 2026
 - Add Inlining subsection under Style: trivial, cheap functions are defined static, directly in the public header, instead of a source file.

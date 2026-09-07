@@ -19,12 +19,15 @@ answering "what is this system", use the system design template. If you're
 answering "why did we do X instead of Y, and what does that commit us to",
 write an ADR.
 
-Not every decision earns a full record. Use the **Full** tier for anything
-with real alternatives on the table, anything touching dependency
-insulation or an API boundary, anything a stranger to the moment would need
-the "why" reconstructed for. Use the **Lite** tier — a single structured
-sentence — for small, reversible, single-alternative calls that still deserve
-a paper trail but not a page.
+Not every decision earns a record, and not every record earns a page.
+Whether a decision crosses the bar at all — and the list of calls that never
+do — lives in `CONVENTIONS.md § Architecture Decision Records`, with the
+rationale in `STYLE_GUIDE.md § Architecture Decision Records`. Once a decision
+is over the bar: use the **Full** tier when two or more alternatives were
+worth comparing, or when the decision changes a public API, a dependency
+edge, or a non-functional profile; use the **Lite** tier — a single
+structured sentence — for the rest, a real fork one-sided enough that a full
+page would be ceremony.
 
 ## Directory & numbering convention
 
@@ -40,8 +43,19 @@ adr/
 
 - IDs are four-digit, zero-padded, and monotonically increasing across the
   whole repo (Full and Lite share one sequence — they're both decisions).
-- An ID is never reused, even if the ADR it names is later deprecated or
-  superseded. History stays intact.
+- Once an ADR has reached `master`, its ID is fixed and never reused — even
+  if the ADR it names is later deprecated or superseded, history stays
+  intact. Before it reaches `master` the sequence is still malleable: a
+  reconciliation pass (as authorised by `adr/0002-adr-admission-threshold`)
+  may delete a sub-threshold record and renumber the rest to stay
+  contiguous — provided every cross-reference, in this repo and in any other
+  repo that cites these IDs, is updated in the same pass.
+- The `master` boundary governs the ADR's **content**, not only its ID.
+  While its subject is only privately implemented (an unmerged branch), an
+  ADR may be rewritten, or merged with a sibling, in place — a change of
+  mind is just more deciding. Once its subject is on `master` the ADR is
+  immutable and a change of mind is a superseding record. Rationale:
+  `STYLE_GUIDE.md § Architecture Decision Records`.
 - The filename is `NNNN-title-slug.md`; the `NNNN. Title` inside the file
   must match the filename's ID and slug.
 - Cross-references (Status's "Superseded by", Related Decisions, or an inline

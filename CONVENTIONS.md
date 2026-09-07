@@ -245,18 +245,94 @@ combination — never left to recur silently.
 
 STYLE_GUIDE.md § Testing and Validation, § Dependability
 
+## Architecture Decision Records
+
+Rationale: STYLE_GUIDE.md § Architecture Decision Records. Numbering,
+cross-reference forms, and the Full / Lite template blocks:
+[`adr_template.md`](./adr_template.md). This section is the mechanical
+threshold only — when a decision earns a record at all, and which tier.
+
+### Write one — both halves must hold
+
+- **Surface** — the decision touches at least one of:
+  - structure — a module boundary, a layer, an architectural pattern
+  - a public interface or published contract
+  - a dependency edge — add / remove / wrap / sever an external or
+    cross-library dependency
+  - a non-functional profile — throughput, footprint, resilience, portability
+  - cross-cutting reach — one change rippling through many translation units
+    or every caller
+- **Friction** — at least one of:
+  - hard or expensive to reverse
+  - a real alternative was on the table and lost
+  - first-of-a-kind for this codebase
+  - a knowing deviation from the style guide (the AGENT.md
+    violation-and-alternatives flow)
+
+Clears surface but not friction → no record; the code already carries it.
+
+### Never write one for
+
+- a detail already fixed by an accepted ADR, `DESIGN.md`, or the style guide
+  — no new decision was made
+- a routine application of an established pattern where no alternative was
+  weighed
+- a purely local, cheaply reversible call — one symbol's name, one loop's
+  shape, one private helper's extraction
+- a decision already written up in a research report or design doc —
+  cross-link, don't restate
+
+### Tier
+
+- **Full** — two or more alternatives worth comparing, **or** the decision
+  changes a public API, a dependency edge, or a non-functional profile.
+- **Lite** (Y-statement) — any other decision that clears the bar.
+
+One ID sequence across both tiers (`adr_template.md`).
+
+### Granularity
+
+- One coherent design is one ADR — however many sub-choices it settles. A
+  genuine sub-fork is a **section** of that ADR, not its own file.
+- A *Considered Option* is an alternative someone actually advocated — not an
+  earlier draft of the chosen design listed as what it was refined away from.
+  Design history goes in the prose.
+
+### Timing
+
+- Drafted when the decision is made; in the branch before it merges to
+  master.
+- A decision that clears the bar, visible in a diff with no record, is a
+  deep-review finding — the merge gate (superproject
+  `adr/0001-deep-review-gate-on-master-merges`) blocks on it like any other.
+
+### Immutability
+
+- An ADR becomes immutable when the change it records reaches `master`. From
+  then on, a changed premise is a **new** record that supersedes the old by
+  ID + link; the original is never edited away, and IDs are never reused.
+- Before that — while the subject is only privately implemented (a
+  development branch, unpushed, unmerged) — the ADR has no observers to
+  protect and may be rewritten, merged with a sibling, split, renumbered, or
+  deleted directly. ADRs preserve the reasoning behind *persisted* changes to
+  established behaviour or structure; a decision that has not persisted has
+  nothing to preserve it against.
+
+STYLE_GUIDE.md § Architecture Decision Records, § Adaptation
+
 ## Templates & meta-files (this repo)
 
 - `infra/standards/<subject>_template.md` — a copy-into-your-document
   template. Existing: `system_design_template.md`, `adr_template.md`.
 - **ADR convention** (full detail: `adr_template.md`) — each repo keeps its
   architectural decisions in `adr/NNNN-title-slug.md`, one shared ID sequence
-  across the Full and Lite tiers, IDs never reused, cross-referenced by ID
+  across the Full and Lite tiers, IDs never reused once on master,
+  cross-referenced by ID
   **and** relative Markdown link — except a reference to an ADR in *another*
   repo, which is ID + repo-qualified path and no link (see `adr_template.md`).
-  Full tier for real alternatives / API or dependency impact; Lite
-  (Y-statement) for small reversible calls. Both carry an optional Framework
-  Hook back to the resilience/OODA framework below.
+  The write / don't-write threshold and the Full vs Lite rule are in
+  § Architecture Decision Records above. Both tiers carry an optional
+  Framework Hook back to the resilience/OODA framework below.
 
 ## Git Commits
 
