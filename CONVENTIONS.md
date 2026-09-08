@@ -97,6 +97,8 @@ One public header per library; internal types opaque (void pointers /
 incomplete types). External dependencies always wrapped behind an
 owned interface, confined to one translation unit.
 
+Headers use `#pragma once`; do not use macro include guards.
+
 STYLE_GUIDE.md § Black-Box Modules, § Insulation
 
 ## Errors
