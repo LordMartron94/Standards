@@ -5,7 +5,7 @@
 # Project-Specific Aliases
 alias fmt='go fmt ./...'
 
-export PATH="$PATH:$HOME/go/bin"
+export PATH="$PATH:$HOME/go/bin:$HOME/.cargo/bin"
 
 alias clang="~/.local/opt/llvm/bin/clang"
 alias clang++="~/.local/opt/llvm/bin/clang++"
