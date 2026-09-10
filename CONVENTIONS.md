@@ -268,7 +268,7 @@ threshold only — when a decision earns a record at all, and which tier.
   - hard or expensive to reverse
   - a real alternative was on the table and lost
   - first-of-a-kind for this codebase
-  - a knowing deviation from the style guide (the AGENT.md
+  - a knowing deviation from the style guide (the `infra/agents/AGENT.md`
     violation-and-alternatives flow)
 
 Clears surface but not friction → no record; the code already carries it.
