@@ -300,7 +300,27 @@ This empirical approach is theoretically grounded in Luhmann’s paradigm of *Se
 
 Programmer errors and invariant violations must trigger immediate, hard, and highly visible failures during the development phase. Gracefully swallowing errors, relying on default zero-initialization, or permitting a system to silently fail introduces subtle, time-traveling bugs that are exceptionally difficult to trace. Memory should be deliberately seeded with specific, recognizable byte patterns upon allocation to guarantee that unauthorized access to uninitialized state causes an immediate fault.
 
-Errors are strictly bifurcated into programmer errors and user errors. Programmer errors mandate explicit assertions that halt execution loud and fast. User errors, which are inevitable occurrences during runtime, must return clear, explicit error codes that force the client architecture to consciously handle the failure state. 
+I distinguish two modes, *development* and *release*, and this distinction is deliberately not the one the compiler already draws between a debug and an optimized build; a module should be able to switch its own development-mode behavior on or off independently of whatever `-O` flag it was compiled with. During development I want to encounter a bug and be forced to confront it immediately; a loud crash at the exact point something went wrong is a gift, because it means I fix the actual defect instead of a symptom three call frames downstream. In release, that same defect reaching a user is not a gift — the user cannot fix what the developer should already have fixed, so the goal shifts from *find it* to *survive it*.
+
+This shift in goal is why I no longer think of failure handling as a strict bifurcation between programmer errors and user errors, but as three distinct mechanisms, each answering a different question:
+
+- **Assertions** answer *is my model of the world still true?* They validate preconditions, postconditions, and invariants. A failed assertion means the programmer's own mental model of the code was wrong, not that the world outside the program misbehaved.
+- **Errors** answer *did an operation fail in a way I already anticipated?* A missing file, a malformed input, a socket that reset. Errors are inevitable, expected, and must return clear, explicit, typed values that force the caller to consciously decide what happens next: translate the error into their own domain's representation, return it unchanged, recover from it, or escalate it.
+- **Panics** answer *should this program keep running at all?* Unlike an assertion, a panic is almost never raised directly by the code that detects a problem. It is nearly always a *caller's* deliberate decision to escalate an ordinary error into something unrecoverable, made by whoever actually has the standing to make that call.
+
+A library must never assume for its clients which of these a given failure deserves. The same underlying condition — an allocation that cannot be satisfied, say — is a shrug in a batch script and potentially fatal in a piece of hospital equipment; the code that detects the condition knows neither of these contexts and has no business deciding on their behalf. This is a direct consequence of Black-Box Modules: a foundational module does not get to reach through its own boundary and decide how the outside world should respond to its failures.
+
+Because bugs are meant to be found and eliminated during development, most assertions should compile to nothing at all in release — there is no reason to carry the weight of a check whose entire purpose was already served before the code ever shipped. But "most" is not "all," and here is the case a purely binary compiled-in/compiled-out model does not cover: a programmer error that, despite every effort, slips past development and reaches release anyway. Under a model where the assertion simply vanishes, this failure mode produces no signal at all — no crash, no error, nothing; the program continues on top of a violated invariant, which for anything that actually matters is worse than crashing outright. I therefore split assertions into three kinds:
+
+- `ASSERT_DEV_ONLY` — the default. Crashes loud and immediately in development; compiled to nothing in release, because by then the condition it checks is assumed proven.
+- `ASSERT_ALWAYS` — for the rare invariant where a hard stop really is the correct answer in every build, development or not.
+- `ASSERT_CRITICAL` — for the invariant important enough to keep checking in release, but where a hard stop is not what that release build wants^11. It crashes in development like any other assertion, and in release it neither vanishes nor aborts; it manufactures an ordinary, properly-typed error and returns it through the function's existing error channel — the same one the caller was already obligated to check. This is the one place a function's signature is allowed to become fallible specifically because of an assertion: an honest cost for an honest guarantee, and one more reason `Errors:` documentation slots must always tell the truth about what a function can actually do.
+
+Escalating an error into a panic deserves its own discipline, because it inherits the same problem as everything else in this section: the decision belongs to whoever owns the *consequence* of being wrong, not to whoever happens to be holding the error at the time. That is almost never the function that first produced the error, and it is not automatically the outermost frame of the whole program either — "root" here means whatever boundary corresponds to a unit that can be abandoned or restarted without taking the rest of the system down with it. A useful test: if this failure turns out to be unrecoverable, what is the smallest piece of the running system that would need to be discarded for everything else to keep making sense? That is where the escalation belongs. I intend for this to be a matter of active review discipline in this codebase, not merely a norm I hope holds — a rule my own tooling can check for is worth more than a rule I only remember to follow.
+
+Whatever form assertions, errors, and panics take, all three exist in service of the same goal beyond resilience itself: **observability**. Second-Order Observation is not free — I need to know, immediately, where and why something failed, which means every one of the three must carry enough source information to answer that question on its own. That information must never come from walking the stack after the fact; a stack walker is exactly the kind of cost this document elsewhere argues against paying on a hot path, and errors are, of the three, the one mechanism active in every release build. Source attribution has to be collected cheaply and explicitly, at the point of failure or at each point of propagation, not reconstructed expensively after the fact.
+
+This also fixes the relative performance budget for each of the three. A panic is about to end execution regardless, so its cost is close to irrelevant. An assertion's cost matters somewhat, since it runs constantly, but only during development, where I am already trading some performance for information. An error's cost matters the most of the three, because it is the one mechanism that is both checked constantly *and* still present in release — it sits, in effect, on every hot path that can fail at all, and it had better be built accordingly.
 
 #### Testing and Validation
 
@@ -338,6 +358,7 @@ This is an incomplete list of references that guided this document. For more det
 8. Steenberg, E. (n.d.). Dependable C. Retrieved June 13, 2026, from https://dependablec.org/
 9. Nygard, M. T. (2011, November 15). Documenting Architecture Decisions. https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions
 10. Starke, G., & Hruschka, P. (n.d.). Document only architecturally relevant decisions! (arc42 Tip 9-1). Retrieved September 6, 2026, from https://docs.arc42.org/tips/9-1/
+11. Holzmann, G. J. (2006). The Power of 10: Rules for Developing Safety-Critical Code. IEEE Computer, 39(6), 95-97.
 
 ---
 
@@ -372,6 +393,13 @@ In other words, the system reproduces itself through its own internal communicat
 ---
 
 ## Changelog
+
+### 12 September 2026
+- Error Handling: replace the strict programmer-error/user-error bifurcation with three distinct mechanisms — assertions (is my model of the world still true?), errors (an anticipated failure, typed and caller-decided), and panics (should the program keep running at all? — almost always a caller's escalation, never the detecting function's call).
+- Split assertions into `ASSERT_DEV_ONLY`, `ASSERT_ALWAYS`, and `ASSERT_CRITICAL` (crashes in development, degrades to a typed error in release instead of vanishing or aborting) to cover a programmer error that reaches release undetected.
+- Add the escalation-boundary heuristic for turning an error into a panic (the boundary that owns the unit of restart/abandonment, not the detecting function and not necessarily the literal program root) and require it be enforced by review tooling, not left as an unenforced norm.
+- Require source attribution for all three to be collected cheaply and explicitly at the point of failure, never via runtime stack-walking.
+- Add reference 11 (NASA/JPL's Power of Ten, Rule 5).
 
 ### 07 September 2026
 - Architecture Decision Records: add the granularity rule (one coherent design is one ADR; a genuine sub-fork is a section, not a file; a Considered Option must be an alternative someone advocated, not an earlier draft of the chosen design) and scope ADR immutability to the `master` boundary — while a change is only privately implemented its ADR may be rewritten, merged, split, renumbered, or deleted in place rather than superseded by a new record. Both also land in `CONVENTIONS.md § Architecture Decision Records` and amend `adr/0002`.
