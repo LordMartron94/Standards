@@ -11,6 +11,7 @@ Checks: >
   -bugprone-lambda-function-name,
   -bugprone-macro-repeated-side-effects,
   -bugprone-easily-swappable-parameters,
+  -bugprone-casting-through-void,
 
   cert-*,
   -cert-dcl21-cpp,
