@@ -29,9 +29,14 @@ section below). For the process templates these rules feed, see the
   — STYLE_GUIDE.md § Naming
 - **Macros:** `UPPER_CASE` by default. May instead be styled like a function
   (`lower_case`, optionally `_`-prefixed per the function rule above) when the
-  macro is meant to read like a function call at its use site. Not covered in
-  STYLE_GUIDE.md's prose; enforced via `.clang-tidy`'s
-  `MacroDefinitionIgnoredRegexp` = `^_?[a-z][a-z0-9_]*$`.
+  macro is meant to read like a function call at its use site. An `UPPER_CASE`
+  macro may additionally take one or more trailing underscores to mark
+  "internal helper, not for direct use" — example: `C_PRAGMA_` (helper behind
+  `C_POISON`) — since a leading underscore before an uppercase letter is a
+  reserved identifier and can't fill that role the way it does for functions.
+  Not covered in STYLE_GUIDE.md's prose; enforced via `.clang-tidy`'s
+  `MacroDefinitionIgnoredRegexp` =
+  `^_?[a-z][a-z0-9_]*$|^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*_+$`.
 
 ## Casing
 

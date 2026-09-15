@@ -102,4 +102,4 @@ CheckOptions:
   - key: readability-identifier-naming.MacroDefinitionCase
     value: UPPER_CASE
   - key: readability-identifier-naming.MacroDefinitionIgnoredRegexp
-    value: "^_?[a-z][a-z0-9_]*$"
+    value: "^_?[a-z][a-z0-9_]*$|^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*_+$"
