@@ -4,6 +4,8 @@ Checks: >
   -*,
 
   clang-diagnostic-*,
+  -clang-diagnostic-variadic-macros,
+  -clang-diagnostic-gnu-zero-variadic-macro-arguments,
 
   bugprone-*,
   -bugprone-exception-escape,
