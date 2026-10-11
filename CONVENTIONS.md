@@ -21,6 +21,21 @@ section below). For the process templates these rules feed, see the
     `bugprone-reserved-identifier` (+ cert aliases) `AllowedIdentifiers`
     exemptions, both `^_[a-z][a-z0-9_]*$`.
   — STYLE_GUIDE.md § Naming
+- **One system = one file (exported functions).** `src/<prefix>_<system>.c`
+  contains ONLY exported functions whose `<system>` part is that file's
+  system. "Exported" means used outside the file: declared in the public
+  header (`<library>_<system>_*`) or in the internal header
+  (`<prefix>_internal.h`, `<prefix>_<system>_*`). An exported function that
+  belongs to a different system goes in that system's file (created if
+  needed), however small the file or however related the two systems feel. A
+  backend/type specialization is part of the system name and gets its own
+  file: `s_rendering_vulkan.c` holds `splash_rendering_vulkan_*`. Name the
+  *function* for the system it belongs to (`splash_adapter_select` in
+  `s_adapter.c`), never for the caller's system. **`static` file-private
+  functions are exempt** — they exist only within one file, so they may be
+  named and placed freely. Mechanically checked (non-static definitions only)
+  by `infra/standards/check_file_system_naming.sh`, run by the post-edit hook.
+  — STYLE_GUIDE.md § Naming
 - **Types:** library-prefixed, full or abbreviated per library
   — full: `NexusPath` (Nexus) — abbreviated: `LLibrary` (Loom)
   — STYLE_GUIDE.md § Naming
