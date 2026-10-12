@@ -91,6 +91,13 @@ Ordered **lowest layer → highest layer**, not alphabetical
 "./<prefix>_internal.h"   (current library internal header)
 ```
 
+**Include what you use.** A file includes every header whose symbols it uses itself, third-party and
+project alike (`<GL/glx.h>`, `<X11/Xlib.h>`, `<xcb/xcb.h>`, `<vulkan/vulkan.h>`, `<blaze.h>`, ...), even when
+one of the library's own headers (`<prefix>_internal.h`, `<backend>_internal.h`) already includes it: an
+include chain hides what a file depends on and breaks when an internal header is reshaped. The one exception
+is what Nexus provides (`NULL`, `size_t`, the fixed-width types): those are not re-included from standard
+headers. `misc-include-cleaner` ("no header providing X is directly included") is the check.
+
 STYLE_GUIDE.md § Includes
 
 ## Function shape
