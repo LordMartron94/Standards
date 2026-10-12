@@ -28,8 +28,15 @@ section below). For the process templates these rules feed, see the
   (`<prefix>_internal.h`, `<prefix>_<system>_*`). An exported function that
   belongs to a different system goes in that system's file (created if
   needed), however small the file or however related the two systems feel. A
-  backend/type specialization is part of the system name and gets its own
-  file: `s_rendering_vulkan.c` holds `splash_rendering_vulkan_*`. Name the
+  small backend/type specialization is part of the system name and gets its own
+  file: `s_rendering_foo.c` holds `splash_rendering_foo_*`. A backend big enough
+  to need several subsystems gets a subfolder instead, `src/<backend>/`, one
+  file per subsystem, `src/<backend>/<prefix>_<system>.c` (prefix = library
+  letter + backend letter, e.g. `sv_device.c`) holding
+  `<library>_<backend>_<system>_*` (`splash_vulkan_device_create`). The backend
+  has two headers: `<prefix>_backend.h`, its entry points and free of
+  backend-API types, the only thing the rest of the library includes; and
+  `<prefix>_internal.h`, what the backend's own files share. Name the
   *function* for the system it belongs to (`splash_adapter_select` in
   `s_adapter.c`), never for the caller's system. **`static` file-private
   functions are exempt** — they exist only within one file, so they may be

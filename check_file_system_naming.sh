@@ -5,6 +5,9 @@
 # file's own system part. One system = one file; a function of another system
 # belongs in that system's file.
 #
+# Backend subfolders (src/<backend>/<prefix>_<system>.c) add the backend to the
+# expected name: <library>_<backend>_<system>_*.
+#
 # Usage: check_file_system_naming.sh <path to libs/<library>/src/<prefix>_<system>.c>
 # Prints one line per violation (nothing when clean). Exit status is always 0
 # so callers can treat the output as advisory text. Files outside
@@ -22,12 +25,20 @@ esac
 library="$(printf '%s' "$f" | sed -E 's#^.*libs/([^/]+)/src/.*$#\1#')"
 stem="$(basename "$f" .c)"
 
+# A file in a backend subfolder, libs/<library>/src/<backend>/<prefix>_<system>.c,
+# belongs to the backend's namespace: its functions are <library>_<backend>_<system>_*.
+backend="$(printf '%s' "$f" | sed -nE 's#^.*libs/[^/]+/src/([^/]+)/[^/]+\.c$#\1#p')"
+
 case "$stem" in
   *_*) system="${stem#*_}" ;;
   *) exit 0 ;;
 esac
 
-expected="${library}_${system}"
+if [ -n "$backend" ]; then
+  expected="${library}_${backend}_${system}"
+else
+  expected="${library}_${system}"
+fi
 prefix="${stem%%_*}"
 internal_expected="${prefix}_${system}"
 
