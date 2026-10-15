@@ -15,12 +15,41 @@ while read -r dir name git_name github_name || [[ -n "$dir" ]]; do
     [[ -z "$dir" || "$dir" == \#* ]] && continue
 
     target_path="${dir}/${name}"
-    self_hosted_url="ssh://git@localhost:22222/home/git/git-repos/${git_name}.git"
+    indexed_entry="$(git ls-files --stage -- "${target_path}")"
+    indexed_mode="${indexed_entry%% *}"
+
+    # Tracked source directories, such as SQLite, have no submodule payload.
+    if [[ -n "$indexed_entry" && "$indexed_mode" != "160000" ]]; then
+        if [[ ! -d "$target_path" ]]; then
+            echo "Error: tracked source directory is missing: $target_path" >&2
+            exit 1
+        fi
+        echo "✔ Verified vendored source: ${target_path} (no submodule or hooks)"
+        continue
+    fi
 
     # 1. Submodule initialization / addition
-    if ! git ls-files --error-unmatch "${target_path}" &>/dev/null; then
+    if [[ -z "$indexed_entry" ]]; then
+        if [[ -z "$git_name" || "$git_name" == "-" ]]; then
+            echo "Error: $target_path is not tracked and has no configured repository." >&2
+            exit 1
+        fi
+        self_hosted_url="ssh://git@localhost:22222/home/git/git-repos/${git_name}.git"
+
+        # Removed submodules can retain Git history here. Keep it intact and
+        # clone the new repository under a distinct administrative name.
+        submodule_name="$target_path"
+        name_suffix=1
+        while [[ -e "$(git rev-parse --git-path "modules/${submodule_name}")" ]] ||
+              git config -f .gitmodules --get "submodule.${submodule_name}.path" >/dev/null 2>&1; do
+            name_suffix=$((name_suffix + 1))
+            submodule_name="${target_path}-${name_suffix}"
+        done
+        if [[ "$submodule_name" != "$target_path" ]]; then
+            echo "  ➜ Preserving old submodule metadata; using name: $submodule_name"
+        fi
         echo "➜ Adding submodule: ${target_path}"
-        git submodule add "${self_hosted_url}" "${target_path}"
+        git submodule add --name "$submodule_name" "${self_hosted_url}" "${target_path}"
     else
         echo "✔ Verified submodule index: ${target_path}"
 
