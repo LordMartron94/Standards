@@ -90,13 +90,13 @@ class WorkspaceSyncTests(unittest.TestCase):
 
     def test_stale_metadata_is_preserved_and_new_repository_is_cloned(self):
         old_remote = self.remote("old/nexus", "old implementation\n")
-        new_remote = self.remote("language/c/core/nexus", "new implementation\n")
+        new_remote = self.remote("languages/c/core/nexus", "new implementation\n")
         stale = self.workspace / ".git/modules/libs/nexus"
         stale.parent.mkdir(parents=True)
         self.git(self.root, "clone", "--bare", str(old_remote), str(stale))
         old_head = self.git(stale, "rev-parse", "HEAD")
         (self.workspace / "workspace.conf").write_text(
-            "libs nexus language/c/core/nexus Nexus-C\n")
+            "libs nexus languages/c/core/nexus Nexus-C\n")
         self.commit(self.workspace)
         self.sync()
         checkout = self.workspace / "libs/nexus"
@@ -117,11 +117,11 @@ class WorkspaceSyncTests(unittest.TestCase):
                          ["libs/nexus", "libs/nexus"])
 
     def test_existing_uninitialized_submodule_is_restored(self):
-        self.remote("language/c/core/nexus", "new implementation\n")
-        url = SERVER_PREFIX + "language/c/core/nexus.git"
+        self.remote("languages/c/core/nexus", "new implementation\n")
+        url = SERVER_PREFIX + "languages/c/core/nexus.git"
         self.git(self.workspace, "submodule", "add", url, "libs/nexus")
         (self.workspace / "workspace.conf").write_text(
-            "libs nexus language/c/core/nexus -\n")
+            "libs nexus languages/c/core/nexus -\n")
         self.commit(self.workspace)
         self.git(self.workspace, "submodule", "deinit", "-f", "--", "libs/nexus")
         result = self.sync()
