@@ -271,6 +271,34 @@ NEXUS_ERRORS_NODISCARD extern NexusError nexus_process_spawn(const NexusProcessS
 
 STYLE_GUIDE.md § Documentation
 
+## Compiler validation after edits
+
+After every C/C++ source or header edit batch, including Python/shell edits,
+format touched C files with PATH `clang-format`, then run the affected
+translation units' exact `compile_commands.json` commands with
+`-fsyntax-only`. Remove only compilation/output/dependency-emission switches
+(`-c`, `-o`, `-MD`, `-MMD`, `-MF`, `-MT`, `-MQ`, `-MP`) and their operands.
+Keep every compiler, dialect, warning, optimization, ABI, definition, and
+include-path option; never substitute hand-written flags or add suppressions.
+
+Run `clang-tidy -p .` with the project's configuration as well. Inspect full
+current diagnostics, without a baseline diff. Fix introduced warnings/errors,
+report any pre-existing include-cleaner noise, and recheck after fixes before
+another edit batch or completion. Header edits require checking their owning
+library and affected consumers, not compiling an isolated header blindly.
+
+Regenerate the MergeSource database with `make configure` (CMake export) when
+new translation units or changed build settings make it stale. Missing exact
+commands are a validation blocker; do not invent approximate flags.
+Successful build-system output, formatter checks, tests, and sanitizer runs do not
+establish compiler-warning cleanliness. Report what actually ran.
+
+Reusable checker: `python3 tools/scripts/check_c_changes.py <source-or-library>`
+(`--report <path>` retains exact commands and full diagnostics). For a header
+edit, pass its owning library plus affected consumer translation units. The
+checker reports the known Nexus-owned NULL include-cleaner noise explicitly;
+it never hides compiler warnings or baseline-diffs new findings.
+
 ## Testing
 
 Investment is proportional to Dependable Dependencies Principle rank ×
